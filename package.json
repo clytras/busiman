@@ -1,0 +1,141 @@
+{
+  "name": "forge-test",
+  "productName": "forge-test",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": "src/index.js",
+  "scripts": {
+    "sass": "node-sass --include-path src/scss --include-path node_modules src/scss/main.scss src/styles/main.css",
+    "dev:sass": "node-sass -w --include-path src/scss --include-path node_modules src/scss/main.scss src/styles/main.css",
+    "dev:start": "electron-forge start",
+    "start": "yarn sass && npm-run-all --parallel --race dev:*",
+    "forge-package": "electron-forge package",
+    "package": "electron-builder build --publish never",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --cache --color --ext .jsx,.js src"
+  },
+  "keywords": [],
+  "author": "zkr32",
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "make_targets": {
+        "win32": [
+          "squirrel"
+        ],
+        "darwin": [
+          "zip"
+        ],
+        "linux": [
+          "deb",
+          "rpm"
+        ]
+      },
+      "electronPackagerConfig": {
+        "packageManager": "yarn"
+      },
+      "electronWinstallerConfig": {
+        "name": "forge_test"
+      },
+      "electronInstallerDebian": {},
+      "electronInstallerRedhat": {},
+      "github_repository": {
+        "owner": "",
+        "name": ""
+      },
+      "windowsStoreConfig": {
+        "packageName": "",
+        "name": "forgetest"
+      }
+    }
+  },
+  "sass": {
+    "includePaths": [
+      "./node_modules"
+    ]
+  },
+  "build": {
+    "productName": "ForgeTest",
+    "appId": "gr.softx.ForgeTest",
+    "files": [
+      "src/",
+      "!src/scss/",
+      "package.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "msi"
+      ]
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "rpm",
+        "snap",
+        "AppImage"
+      ],
+      "category": "Development"
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "clytras",
+      "repo": "busiman",
+      "private": false
+    }
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.8.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.17",
+    "@fortawesome/free-solid-svg-icons": "^5.8.1",
+    "@fortawesome/react-fontawesome": "^0.1.4",
+    "aphrodite": "^2.3.1",
+    "bootstrap-scss": "^4.3.1",
+    "electron-compile": "^6.4.4",
+    "electron-devtools-installer": "^2.1.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "platform": "^1.3.5",
+    "react": "^16.8.4",
+    "react-accessible-accordion": "^2.4.5",
+    "react-dom": "^16.8.4",
+    "react-hot-loader": "^4.8.0",
+    "react-localization": "^1.0.13",
+    "react-splitter-layout": "^4.0.0",
+    "reactstrap": "^7.1.0"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-plugin-transform-es2015-classes": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "electron-builder": "^20.39.0",
+    "electron-forge": "^5.2.4",
+    "electron-prebuilt-compile": "4.0.0",
+    "eslint": "^3",
+    "eslint-config-airbnb": "^15",
+    "eslint-plugin-import": "^2",
+    "eslint-plugin-jsx-a11y": "^5",
+    "eslint-plugin-react": "^7",
+    "node-sass": "^4.11.0",
+    "npm-run-all": "^4.1.5"
+  }
+}

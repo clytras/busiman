@@ -1,0 +1,70 @@
+//@import url('https://fonts.googleapis.com/css?family=Nunito');
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+@import 'react-accessible-accordion/dist/fancy-example';
+@import 'react-splitter-layout/lib/index';
+@import 'bootstrap-scss/bootstrap';
+
+
+
+.navbar-laravel {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+
+html, body, #App { height: 100% }
+
+#App {
+  color: blue;
+}
+
+.splitter-layout > .layout-splitter {
+  background-color: transparent;
+}
+
+.splitter-layout .layout-splitter:hover {
+  -webkit-transition: background-color 100ms linear;
+  -ms-transition: background-color 100ms linear;
+  transition: background-color 100ms linear;
+}
+
+.accordion {
+  border: none;
+  .accordion__title {
+    padding: 10px;
+    outline: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    h3 {
+      font-size: 1em;
+    }
+    .accordion__arrow {
+      margin-top: -7px;
+    }
+  }
+  .accordion__body {
+    background-color: #fff;
+    //border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .accordion__item + .accordion__item {
+    border-top: none;
+  }
+}
+
+.inlineMenuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    line-height: 2em;
+  }
+}
+
+  
+#zkr {
+  .zkr-test {
+    color: blue ;
+  }
+}
