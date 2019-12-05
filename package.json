@@ -77,7 +77,8 @@
     "**/**/set-value": "^3.0.1",
     "**/**/braces": "^2.3.1",
     "**/**/lodash": "^4.17.12",
-    "**/**/minimatch": "^3.0.2"
+    "**/**/minimatch": "^3.0.2",
+    "**/**/serialize-javascript": "^2.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.4",
