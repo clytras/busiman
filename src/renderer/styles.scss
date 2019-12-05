@@ -1,0 +1,51 @@
+
+html, body, .app { height: 100% }
+
+body.init {
+  background-color: transparent;
+}
+
+main.init {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+   color: blue;
+}
+
+.splitter-layout > .layout-splitter {
+  background-color: transparent;
+}
+
+.splitter-layout .layout-splitter:hover {
+  -webkit-transition: background-color 100ms linear;
+  -ms-transition: background-color 100ms linear;
+  transition: background-color 100ms linear;
+}
+
+.accordion {
+  border: none;
+  .accordion__title {
+    padding: 10px;
+    outline: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    h3 {
+      font-size: 1em;
+    }
+    .accordion__arrow {
+      margin-top: -7px;
+    }
+  }
+  .accordion__body {
+    background-color: #fff;
+    //border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .accordion__item + .accordion__item {
+    border-top: none;
+  }
+}
