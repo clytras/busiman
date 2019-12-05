@@ -150,7 +150,7 @@ export class InitWindow extends Window {
       height: 300,
       width: 650,
       center: true,
-      transparent: true,
+      // transparent: true,
       frame: false,
       webPreferences: {
         // nativeWindowOpen: true,
