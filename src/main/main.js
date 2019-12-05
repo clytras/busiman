@@ -4,6 +4,7 @@ import { app, BrowserWindow, ipcMain as ipc } from 'electron';
 //import { enableLiveReload } from 'electron-compile';
 import path from 'path';
 import url from 'url';
+import util from 'util';
 import { selectAppIcon } from '../utils';
 
 import { InitWindow, MainWindow } from './windows';
@@ -24,6 +25,16 @@ import { InitWindow, MainWindow } from './windows';
 let mainWindow, initWindow;
 
 console.log(`__dirname: ${__dirname}`);
+console.log('app.getGPUFeaturesStatus', util.inspect(app.getGPUFeatureStatus()));
+
+app.getGPUInfo('complete')
+.then(info => {
+  console.log('app.getGPUInfo', util.inspect(info));
+})
+.catch(error => {
+  console.error('app.getGPUInfo', util.inspect(error));
+});
+
 
 // let watchInterval = (new Date).getTime();
 
@@ -276,3 +287,54 @@ if (!gotTheLock) {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+
+
+
+
+
+
+// ----------------------------------------------------------------------
+// app.getGPUFeaturesStatus {
+//   '2d_canvas': 'disabled_software',
+//   flash_3d: 'disabled_software',
+//   flash_stage3d: 'disabled_software',
+//   flash_stage3d_baseline: 'disabled_software',
+//   gpu_compositing: 'disabled_software',
+//   multiple_raster_threads: 'disabled_off',
+//   oop_rasterization: 'disabled_off',
+//   protected_video_decode: 'disabled_off',
+//   rasterization: 'disabled_software',
+//   skia_renderer: 'disabled_off_ok',
+//   video_decode: 'disabled_software',
+//   viz_display_compositor: 'enabled_on',
+//   viz_hit_test_surface_layer: 'disabled_off_ok',
+//   webgl: 'disabled_off',
+//   webgl2: 'disabled_off'
+// }
+// app.getGPUInfo {
+//   auxAttributes: {
+//     amdSwitchable: false,
+//     canSupportThreadedTextureMailbox: false,
+//     glResetNotificationStrategy: 0,
+//     inProcessGpu: true,
+//     initializationTime: 0,
+//     jpegDecodeAcceleratorSupported: false,
+//     oopRasterizationSupported: false,
+//     optimus: false,
+//     passthroughCmdDecoder: false,
+//     rgbaVisual: 0,
+//     sandboxed: false,
+//     softwareRendering: false,
+//     systemVisual: 0,
+//     videoDecodeAcceleratorFlags: 0
+//   },
+//   gpuDevice: [
+//     {
+//       active: false,
+//       cudaComputeCapabilityMajor: 0,
+//       deviceId: 0,
+//       vendorId: 0
+//     }
+//   ]
+// }
