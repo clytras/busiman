@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
 //import { enableLiveReload } from 'electron-compile';
+import util from 'util';
 import path from 'path';
 import url from 'url';
 import { selectAppIcon } from '../utils';
@@ -164,7 +165,12 @@ export class InitWindow extends Window {
       return false;
     }
 
-    this.browserWindowOptions.transparent = process.env.APP_HASGPU;
+    this.browserWindowOptions.transparent = process.config.appHasGPU;
+    console.log('process.env.APP_HASGPU', process.env.APP_HASGPU);
+    console.log('this.browserWindowOptions.transparent', this.browserWindowOptions.transparent);
+    console.log('this.browserWindowOptions', util.inspect(this.browserWindowOptions));
+
+    
     this.window = new BrowserWindow(this.browserWindowOptions);
     this.window.loadURL(
       url.format({

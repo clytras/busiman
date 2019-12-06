@@ -15,6 +15,7 @@
     "dev-run": "yarn run dev && yarn run electron",
     "development": "rimraf dist && webpack --config ./webpack.dev.js && webpack --config ./webpack.hot.js",
     "dev:main": "webpack --config ./webpack.dev.js",
+    "dev:electron": "yarn run dev:main && yarn run electron",
     "production": "rimraf dist && webpack --config ./webpack.prod.js --progress --colors",
     "bundle": "webpack --watch --config ./webpack.dev.js --progress --colors --mode development",
     "serve": "electron ./dist/main.bundle.js",

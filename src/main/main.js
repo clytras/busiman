@@ -12,6 +12,7 @@ import { InitWindow, MainWindow } from './windows';
 //require('electron-reload')(__dirname)
 
 
+process.config = {}
 
 /*nodemon.on('start', function () {
   console.log('App has started');
@@ -130,8 +131,9 @@ function appStart() {
     // createInitWindow();
 
   // (async () => {
-    process.env.APP_HASGPU = await hasGPUEnabled();
-    console.log('hasGPUEnabled', process.env.APP_HASGPU);
+    let hasGPU = await hasGPUEnabled();
+    process.config.appHasGPU = hasGPU;
+    console.log('hasGPUEnabled', util.inspect(process.config.appHasGPU), util.inspect(hasGPU));
   //   console.log('got process.env.APP_HASGPU', process.env.APP_HASGPU);
   //   appStart();
   // })();

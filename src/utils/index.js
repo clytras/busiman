@@ -18,21 +18,23 @@ export function isDbgMode() {
   return (isRenderer ? remote.process : process).argv.indexOf('--dbg') !== -1;
 }
 
-export async function hasGPUEnabled(infoType = 'complete') {
+import util from 'util';
+export async function hasGPUEnabled(infoType = 'basic') {
   let result = false;
 
   try {
     const { gpuDevice = [] } = await app.getGPUInfo(infoType);
 
     if(gpuDevice && gpuDevice.length) {
-      for(let { active } of gpuDevice) {
-        console.log('active', active);
-        if(result = active) {
+      for(let { deviceId, vendorId } of gpuDevice) {
+        if(result = (deviceId !== 0 && vendorId !== 0)) {
           break;
         }
       }
     }
   } catch(error) {}
+
+  console.log('hasGPUEnabled:result', util.inspect(result));
 
   return result;
 }
