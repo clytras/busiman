@@ -40,6 +40,7 @@ const common = {
               '@babel/preset-react',
             ],
             plugins: [
+              ['@babel/plugin-transform-runtime', { regenerator: true }],
               ['@babel/plugin-proposal-class-properties', { loose: true }],
               'react-hot-loader/babel',
             ],
@@ -129,7 +130,7 @@ const rendererConfig = merge.smart(renderer, {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './src/renderer/index.ejs'),
       templateParameters: (compilation, assets, options) => ({
-        title: package.fullDisplayName,
+        title: package.productName,
         dev: true,
         webpackConfig: compilation.options
       }),

@@ -1,7 +1,7 @@
 {
   "name": "businessman",
-  "displayName": "BusinessMan",
-  "fullDisplayName": "Business Manager",
+  "shortName": "BusinessMan",
+  "productName": "Business Manager",
   "version": "0.0.1",
   "description": "A business organizer application",
   "main": "./dist/main.bundle.js",
@@ -84,6 +84,7 @@
     "@babel/cli": "^7.7.4",
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-transform-runtime": "^7.7.4",
     "@babel/preset-env": "^7.7.4",
     "@babel/preset-react": "^7.7.4",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
@@ -146,6 +147,7 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@babel/runtime": "^7.7.4",
     "sqlite3": "^4.1.0"
   }
 }

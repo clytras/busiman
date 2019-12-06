@@ -70,6 +70,7 @@ module.exports = {
               '@babel/preset-react',
             ],
             plugins: [
+              ['@babel/plugin-transform-runtime', { regenerator: true }],
               ['@babel/plugin-proposal-class-properties', { loose: true }],
               'react-hot-loader/babel',
             ],
@@ -108,7 +109,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './src/renderer/index.ejs'),
       templateParameters: (compilation, assets, options) => ({
-        title: package.fullDisplayName,
+        title: package.productName,
         dev: true,
         webpackConfig: compilation.options
       }),
@@ -118,7 +119,7 @@ module.exports = {
       filename: 'init.html',
       template: path.resolve(__dirname, './src/renderer/init.ejs'),
       templateParameters: (compilation, assets, options) => ({
-        title: package.fullDisplayName,
+        title: package.productName,
         dev: true,
         webpackConfig: compilation.options
       }),

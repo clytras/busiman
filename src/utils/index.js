@@ -1,5 +1,5 @@
 import os from 'os';
-import { remote } from 'electron';
+import { app, remote } from 'electron';
 const isRenderer = require('is-electron-renderer');
 
 export function selectAppIcon() {
@@ -16,4 +16,23 @@ export function isDevMode() {
 
 export function isDbgMode() {
   return (isRenderer ? remote.process : process).argv.indexOf('--dbg') !== -1;
+}
+
+export async function hasGPUEnabled(infoType = 'complete') {
+  let result = false;
+
+  try {
+    const { gpuDevice = [] } = await app.getGPUInfo(infoType);
+
+    if(gpuDevice && gpuDevice.length) {
+      for(let { active } of gpuDevice) {
+        console.log('active', active);
+        if(result = active) {
+          break;
+        }
+      }
+    }
+  } catch(error) {}
+
+  return result;
 }

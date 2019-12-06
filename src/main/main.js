@@ -1,11 +1,11 @@
 
 
-import { app, BrowserWindow, ipcMain as ipc } from 'electron';
+import { app, systemPreferences, ipcMain as ipc } from 'electron';
 //import { enableLiveReload } from 'electron-compile';
 import path from 'path';
 import url from 'url';
 import util from 'util';
-import { selectAppIcon } from '../utils';
+import { hasGPUEnabled } from '../utils';
 
 import { InitWindow, MainWindow } from './windows';
 
@@ -22,12 +22,17 @@ import { InitWindow, MainWindow } from './windows';
   console.log('App restarted due to: ', files);
 });*/
 
-let mainWindow, initWindow;
+// let mainWindow, initWindow;
 
 console.log(`__dirname: ${__dirname}`);
+
+
+console.log('systemPreferences.getAnimationSettings', util.inspect(systemPreferences.getAnimationSettings()));
+
 console.log('app.getGPUFeaturesStatus', util.inspect(app.getGPUFeatureStatus()));
 
-app.getGPUInfo('complete')
+
+app.getGPUInfo('basic')
 .then(info => {
   console.log('app.getGPUInfo', util.inspect(info));
 })
@@ -72,6 +77,26 @@ const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
 } else {
+
+  // (async () => {
+  //   process.env.APP_HASGPU = await hasGPUEnabled();
+  //   console.log('got process.env.APP_HASGPU', process.env.APP_HASGPU);
+  //   appStart();
+  // })();
+
+  // hasGPUEnabled()
+  // .then(hasGPU => {
+  //   process.env.APP_HASGPU = hasGPU;
+  //   appStart();
+  // });
+
+  appStart();
+}
+
+
+function appStart() {
+  console.log('appStart');
+
   const initWindow = new InitWindow();
   const mainWindow = new MainWindow();
 
@@ -96,13 +121,21 @@ if (!gotTheLock) {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', function() {
+  app.on('ready', async () => {
     // app.on('browser-window-created',function(e,window) {
     //   window.setMenu(null);
     // });
 
     // createWindow();
     // createInitWindow();
+
+  // (async () => {
+    process.env.APP_HASGPU = await hasGPUEnabled();
+    console.log('hasGPUEnabled', process.env.APP_HASGPU);
+  //   console.log('got process.env.APP_HASGPU', process.env.APP_HASGPU);
+  //   appStart();
+  // })();
+
     initWindow.create();
   });
 
@@ -125,9 +158,6 @@ if (!gotTheLock) {
     }
   });
 }
-
-
-
 
 
 // function createWindow() {

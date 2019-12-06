@@ -147,10 +147,10 @@ export class InitWindow extends Window {
   constructor() {
     super({
       icon: selectAppIcon(),
-      height: 300,
-      width: 650,
+      height: 160,
+      width: 300,
       center: true,
-      // transparent: true,
+      transparent: true,
       frame: false,
       webPreferences: {
         // nativeWindowOpen: true,
@@ -164,6 +164,7 @@ export class InitWindow extends Window {
       return false;
     }
 
+    this.browserWindowOptions.transparent = process.env.APP_HASGPU;
     this.window = new BrowserWindow(this.browserWindowOptions);
     this.window.loadURL(
       url.format({
