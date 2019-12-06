@@ -103,13 +103,16 @@ if (!gotTheLock) {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', async () => {
+  app.on('ready', () => {
     // app.on('browser-window-created',function(e,window) {
     //   window.setMenu(null);
     // });
 
-    process.app.system.hasGPU = await hasGPUEnabled();
-    initWindow.create();
+    // process.app.system.hasGPU = await hasGPUEnabled();
+
+    setTimeout(() => {
+      initWindow.create();
+    }, 300);
   });
 
   // Quit when all windows are closed.

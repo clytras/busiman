@@ -165,7 +165,7 @@ export class InitWindow extends Window {
       return false;
     }
 
-    this.browserWindowOptions.transparent = process.app.system.hasGPU;
+    // this.browserWindowOptions.transparent = process.app.system.hasGPU;
     this.window = new BrowserWindow(this.browserWindowOptions);
     this.window.loadURL(
       url.format({

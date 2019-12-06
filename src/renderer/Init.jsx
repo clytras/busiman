@@ -28,9 +28,9 @@ export default function() {
   const classes = useStyles();
 
   useEffect(() => {
-    setTimeout(() => {
-      ipc.send('init:done');
-    }, 1000);
+    // setTimeout(() => {
+    //   ipc.send('init:done');
+    // }, 1000);
   }, []);
 
   return (
