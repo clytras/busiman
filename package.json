@@ -7,7 +7,7 @@
   "main": "./dist/main.bundle.js",
   "scripts": {
     "start3": "./node_modules/.bin/electron ./dist/main.bundle.js",
-    "electron": "electron . --dev --dbg",
+    "electron": "electron . --enable-transparent-visuals --dev --dbg",
     "start4": "nodemon ./src/main.js --exec \"yarn run electron\"",
     "start": "nodemon --watch ./src/renderer/ && yarn run electron",
     "dev": "webpack --watch --config ./webpack.dev.js --progress --colors",

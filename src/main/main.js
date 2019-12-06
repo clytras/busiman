@@ -12,7 +12,10 @@ import { InitWindow, MainWindow } from './windows';
 //require('electron-reload')(__dirname)
 
 
-process.config = {}
+process.app = {
+  system: {},
+  config: {}
+}
 
 /*nodemon.on('start', function () {
   console.log('App has started');
@@ -25,21 +28,19 @@ process.config = {}
 
 // let mainWindow, initWindow;
 
-console.log(`__dirname: ${__dirname}`);
+// console.log(`__dirname: ${__dirname}`);
 
+// console.log('systemPreferences.getAnimationSettings', util.inspect(systemPreferences.getAnimationSettings()));
 
-console.log('systemPreferences.getAnimationSettings', util.inspect(systemPreferences.getAnimationSettings()));
+// console.log('app.getGPUFeaturesStatus', util.inspect(app.getGPUFeatureStatus()));
 
-console.log('app.getGPUFeaturesStatus', util.inspect(app.getGPUFeatureStatus()));
-
-
-app.getGPUInfo('basic')
-.then(info => {
-  console.log('app.getGPUInfo', util.inspect(info));
-})
-.catch(error => {
-  console.error('app.getGPUInfo', util.inspect(error));
-});
+// app.getGPUInfo('basic')
+// .then(info => {
+//   console.log('app.getGPUInfo', util.inspect(info));
+// })
+// .catch(error => {
+//   console.error('app.getGPUInfo', util.inspect(error));
+// });
 
 
 // let watchInterval = (new Date).getTime();
@@ -78,26 +79,6 @@ const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
 } else {
-
-  // (async () => {
-  //   process.env.APP_HASGPU = await hasGPUEnabled();
-  //   console.log('got process.env.APP_HASGPU', process.env.APP_HASGPU);
-  //   appStart();
-  // })();
-
-  // hasGPUEnabled()
-  // .then(hasGPU => {
-  //   process.env.APP_HASGPU = hasGPU;
-  //   appStart();
-  // });
-
-  appStart();
-}
-
-
-function appStart() {
-  console.log('appStart');
-
   const initWindow = new InitWindow();
   const mainWindow = new MainWindow();
 
@@ -127,17 +108,7 @@ function appStart() {
     //   window.setMenu(null);
     // });
 
-    // createWindow();
-    // createInitWindow();
-
-  // (async () => {
-    let hasGPU = await hasGPUEnabled();
-    process.config.appHasGPU = hasGPU;
-    console.log('hasGPUEnabled', util.inspect(process.config.appHasGPU), util.inspect(hasGPU));
-  //   console.log('got process.env.APP_HASGPU', process.env.APP_HASGPU);
-  //   appStart();
-  // })();
-
+    process.app.system.hasGPU = await hasGPUEnabled();
     initWindow.create();
   });
 
@@ -160,6 +131,8 @@ function appStart() {
     }
   });
 }
+
+
 
 
 // function createWindow() {

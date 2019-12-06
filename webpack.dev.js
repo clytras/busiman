@@ -128,8 +128,9 @@ const rendererConfig = merge.smart(renderer, {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, './src/renderer/index.ejs'),
+      template: path.resolve(__dirname, './src/renderer/renderer.ejs'),
       templateParameters: (compilation, assets, options) => ({
+        windowId: 'app',
         title: package.productName,
         dev: true,
         webpackConfig: compilation.options

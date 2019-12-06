@@ -25,6 +25,23 @@ const cspPlugin = {
   }
 }
 
+const plugins = ['init', 'setup', 'app']
+.map(windowId => new HtmlWebpackPlugin({
+  filename: `${windowId}.html`,
+  template: path.resolve(__dirname, './src/renderer/renderer.ejs'),
+  templateParameters: (compilation, assets, options) => ({
+    windowId,
+    title: package.productName,
+    dev: true,
+    webpackConfig: compilation.options
+  }),
+  cspPlugin
+}))
+.concat([
+  new CspHtmlWebpackPlugin(),
+  new webpack.NamedModulesPlugin()
+]);
+
 module.exports = {
   mode,
   target: 'electron-renderer',
@@ -105,29 +122,7 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, './src/renderer/index.ejs'),
-      templateParameters: (compilation, assets, options) => ({
-        title: package.productName,
-        dev: true,
-        webpackConfig: compilation.options
-      }),
-      cspPlugin
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'init.html',
-      template: path.resolve(__dirname, './src/renderer/init.ejs'),
-      templateParameters: (compilation, assets, options) => ({
-        title: package.productName,
-        dev: true,
-        webpackConfig: compilation.options
-      }),
-      cspPlugin
-    }),
-    new CspHtmlWebpackPlugin(),
-    new webpack.NamedModulesPlugin()
-  ],
+  plugins
 }
 
 // const initializerConfig = merge.smart(renderer, {
