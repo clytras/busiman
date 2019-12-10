@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const merge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CspHtmlWebpackPlugin = require('csp-html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const env = process.env.NODE_ENV;
 const port = process.env.PORT || 9000;
@@ -25,6 +26,9 @@ const common = {
     __dirname: false,
     __filename: false,
   },
+  externals: {
+    knex: 'commonjs knex'
+  },
   module: {
     rules: [
       {
@@ -36,7 +40,7 @@ const common = {
             cacheDirectory: true,
             babelrc: false,
             presets: [
-              ['@babel/preset-env', { targets: { browsers: 'last 1 version' } }],
+              '@babel/preset-env',
               '@babel/preset-react',
             ],
             plugins: [
@@ -118,6 +122,20 @@ const mainConfig = merge.smart(common, {
     modules: ['node_modules'],
     extensions: ['.js', '.jsx', '.json'],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      PACKAGE: {
+        name: JSON.stringify(package.name),
+        shortName: JSON.stringify(package.shortName),
+        productName: JSON.stringify(package.productName),
+        version: JSON.stringify(package.version),
+      }
+    }),
+    new CopyWebpackPlugin([{
+      from: './migrations',
+      to: 'migrations/'
+    }], { debug: true })
+  ]
 });
 
 const rendererConfig = merge.smart(renderer, {

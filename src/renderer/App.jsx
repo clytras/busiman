@@ -19,6 +19,8 @@ import Button from '@material-ui/core/Button';
 import * as platform from 'platform';
 import { isDevMode, isDbgMode } from '../utils';
 
+const app = require('electron').remote.app
+
 
 // import {library} from '@fortawesome/fontawesome-svg-core'
 // import {
@@ -113,7 +115,12 @@ function App() {
             }</pre>
             <pre>
               Dev mode: {isDevMode() ? 'yes' : 'no'}{"\n"}
-              Dbg mode: {isDbgMode() ? 'yes' : 'no'}
+              Dbg mode: {isDbgMode() ? 'yes' : 'no'}{"\n"}
+              appPath: {`${app.getAppPath()}\n`}
+              path:appData: {`${app.getPath('appData')}\n`}
+              path:userData: {`${app.getPath('userData')}\n`}
+              path:exe: {`${app.getPath('exe')}\n`}
+              path:module: {`${app.getPath('module')}\n`}
             </pre>
           
             <Button variant="contained" color="primary" onClick={openPopup}>{"Open Modal!!"}</Button>

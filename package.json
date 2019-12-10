@@ -7,7 +7,7 @@
   "main": "./dist/main.bundle.js",
   "scripts": {
     "start3": "./node_modules/.bin/electron ./dist/main.bundle.js",
-    "electron": "electron . --enable-transparent-visuals --dev --dbg",
+    "electron": "electron . --dev --dbg",
     "start4": "nodemon ./src/main.js --exec \"yarn run electron\"",
     "start": "nodemon --watch ./src/renderer/ && yarn run electron",
     "dev": "webpack --watch --config ./webpack.dev.js --progress --colors",
@@ -22,10 +22,13 @@
     "start2": "npm-run-all --parallel bundle serve",
     "postinstall": "electron-builder install-app-deps",
     "dist": "rimraf release && electron-builder",
-    "clean:release": "rimraf release"
+    "clean:release": "rimraf release",
+    "test:db:reset": "node ./scripts/resetTestDb.js",
+    "test:db": "jest \"db\\.(.*)\\.test\\.js\" --verbose"
   },
   "author": "Christos Lytras <christos.lytras@gmail.com>",
   "license": "MIT",
+  "browserslist": "electron >= 7.1",
   "build": {
     "productName": "BusinessMan",
     "copyright": "Copyright © 2020 ${author}",
@@ -88,6 +91,7 @@
     "@babel/plugin-transform-runtime": "^7.7.4",
     "@babel/preset-env": "^7.7.4",
     "@babel/preset-react": "^7.7.4",
+    "@babel/runtime": "^7.7.4",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/react-fontawesome": "^0.1.7",
@@ -96,8 +100,11 @@
     "@material-ui/core": "^4.7.1",
     "aphrodite": "^2.4.0",
     "app-root-path": "^3.0.0",
+    "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
     "bootstrap": "^4.4.1",
+    "colors": "^1.4.0",
+    "copy-webpack-plugin": "^5.0.5",
     "core-js": "^3.4.7",
     "cp-cli": "^2.0.0",
     "cross-env": "^6.0.3",
@@ -109,11 +116,13 @@
     "electron-reload": "^1.5.0",
     "extract-loader": "^3.1.0",
     "file-loader": "^5.0.2",
+    "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
     "glob-fs": "^0.1.7",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
     "is-electron-renderer": "^2.0.1",
+    "jest": "^24.9.0",
     "knex": "^0.20.3",
     "luxon": "^1.21.3",
     "material-design-icons": "^3.0.1",
@@ -122,6 +131,7 @@
     "node-sass": "^4.13.0",
     "nodemon": "^2.0.1",
     "npm-run-all": "^4.1.5",
+    "objection": "^2.0.3",
     "platform": "^1.3.5",
     "react": "^16.12.0",
     "react-accessible-accordion": "^2.4.5",
@@ -148,7 +158,6 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "@babel/runtime": "^7.7.4",
     "sqlite3": "^4.1.0"
   }
 }

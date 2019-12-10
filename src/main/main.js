@@ -1,21 +1,25 @@
 
 
+import '../global';
 import { app, systemPreferences, ipcMain as ipc } from 'electron';
 //import { enableLiveReload } from 'electron-compile';
 import path from 'path';
 import url from 'url';
 import util from 'util';
 import { hasGPUEnabled } from '../utils';
-
+import { initApp } from './init';
 import { InitWindow, MainWindow } from './windows';
-
+// import { hasConfigDb } from '../db';
 //require('electron-reload')(__dirname)
 
-
-process.app = {
-  system: {},
-  config: {}
-}
+// console.log('hasConfigDb', hasConfigDb());
+// process.app = {
+//   system: {
+//     hasAppDb: false,
+//     hadDataDb: false
+//   },
+//   config: {}
+// }
 
 /*nodemon.on('start', function () {
   console.log('App has started');
@@ -82,8 +86,9 @@ if (!gotTheLock) {
   const initWindow = new InitWindow();
   const mainWindow = new MainWindow();
 
-  ipc.on('init:done', () => {
+  ipc.on('init:done', async () => {
     console.log('got init:done');
+    await initApp();
     mainWindow.create();
     mainWindow.once('ready-to-show', () => {
       initWindow.close();
@@ -110,9 +115,10 @@ if (!gotTheLock) {
 
     // process.app.system.hasGPU = await hasGPUEnabled();
 
+    // add delay for init window to have transparency for linux machines
     setTimeout(() => {
       initWindow.create();
-    }, 300);
+    }, 500);
   });
 
   // Quit when all windows are closed.

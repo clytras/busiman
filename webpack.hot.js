@@ -49,6 +49,9 @@ module.exports = {
     __dirname: false,
     __filename: false,
   },
+  externals: {
+    knex: 'commonjs knex'
+  },
   entry: './src/renderer/renderer.jsx',
   output: {
     filename: 'renderer.bundle.js',
@@ -83,7 +86,7 @@ module.exports = {
             cacheDirectory: true,
             babelrc: false,
             presets: [
-              ['@babel/preset-env', { targets: { browsers: 'last 1 version' } }],
+              '@babel/preset-env',
               '@babel/preset-react',
             ],
             plugins: [
