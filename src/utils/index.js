@@ -1,5 +1,6 @@
 import os from 'os';
 import { app, remote } from 'electron';
+
 const isRenderer = require('is-electron-renderer');
 
 export function selectAppIcon() {
@@ -8,6 +9,10 @@ export function selectAppIcon() {
     case 'darwin': return require('../../assets/BusinessMan_Mac.icns').default;
     default: return require('../../assets/BusinessMan_Linux.png').default;
   }
+}
+
+export function appTitle(...parts) {
+  return [(isRenderer ? remote.app : app).name, ...parts].join(' - ');
 }
 
 export function isDevMode() {

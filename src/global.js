@@ -13,6 +13,7 @@ process.app = {
     app: null,
     data: null,
     appFile: path.join(dataPath, `${PACKAGE.name}.db`),
+    dataConnection: {},
     dataDefaultSQLiteFile: path.join(dataPath, `${PACKAGE.name}.data.db`),
     dataDefaultDatabaseName: PACKAGE.name,
     migrationsName,
@@ -22,5 +23,5 @@ process.app = {
     hasAppDb: false,
     hadDataDb: false
   },
-  config: {}
+  config: null
 }

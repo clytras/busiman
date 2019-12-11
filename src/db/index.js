@@ -21,11 +21,11 @@ export class DB {
     this._config = {...config}
   }
 
-  static validConfig({
+  static validConfig(config, {
     mustHaveDatabase = false
-  }) {
+  } = {}) {
     let result = false;
-    const { client, connection } = this._config || {};
+    const { client, connection } = config || {};
 
     switch(client) {
       case 'sqlite3':
@@ -53,11 +53,18 @@ export class DB {
   }
 
   async exists({
-    keepConnection = true
+    keepConnection = true,
+    validateConfig = true
   } = {}) {
     let result = false;
     let db;
     let testQuery = 'SELECT 1';
+
+    const { _config: config } = this;
+
+    if(validateConfig && !DB.validConfig(config)) {
+      return false;
+    }
 
     switch(this._config.client) {
       case 'oracle':

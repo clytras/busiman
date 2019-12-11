@@ -3,7 +3,8 @@ import { BrowserWindow } from 'electron';
 import util from 'util';
 import path from 'path';
 import url from 'url';
-import { selectAppIcon } from '../utils';
+import { selectAppIcon, isDevMode, appTitle } from '@utils';
+import { Strings } from 'i18n';
 
 
 class Window {
@@ -15,9 +16,9 @@ class Window {
     this.options = options || {};
   }
 
-  create({ forse = false } = {}) {
+  create({ force = false } = {}) {
     if(this.window !== null) {
-      if(!forse) {
+      if(!force) {
         return false;
       }
       this.window.close();
@@ -34,30 +35,49 @@ class Window {
       if(this.window.isMinimized()) this.window.restore()
       this.window.focus()
     }
+    return this;
   }
 
   show() {
     if(this.window) {
       this.window.show();
     }
+    return this;
   }
 
   close() {
     if(this.window) {
       this.window.close();
     }
+    return this;
+  }
+
+  openDevTools() {
+    if(this.window && isDevMode()) {
+      this.window.webContents.openDevTools();
+    }
+    return this;
   }
 
   on(event, callback) {
     if(this.window) {
       this.window.on(event, callback);
     }
+    return this;
   }
 
   once(event, callback) {
     if(this.window) {
       this.window.once(event, callback);
     }
+    return this;
+  }
+
+  send(event, ...args) {
+    if(this.window) {
+      this.window.webContents.send(event, ...args)
+    }
+    return this;
   }
 }
 
@@ -190,6 +210,7 @@ export class SetupWindow extends Window {
   constructor() {
     super({
       icon: selectAppIcon(),
+      // title: appTitle(Strings.titles.Installation),
       height: 480,
       width: 640,
       maximizable: false,
@@ -213,6 +234,7 @@ export class SetupWindow extends Window {
         slashes: true,
       })
     );
+    this.window.setMenu(null);
 
     // Emitted when the window is closed.
     this.window.on('closed', () => {

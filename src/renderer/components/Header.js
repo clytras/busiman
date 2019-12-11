@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 // import { StyleSheet, css } from 'aphrodite/no-important';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { Strings } from '../../lang/strings';
-import Globals from '../../Globals';
+import { Strings } from '@i18n';
+import Globals from '@app/globals';
 
 
 export default function() {

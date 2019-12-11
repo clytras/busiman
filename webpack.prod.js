@@ -36,11 +36,11 @@ const common = {
           loader: 'babel-loader',
           options: {
             cacheDirectory: true,
-            babelrc: false,
-            presets: [
-              ['@babel/preset-env', { targets: { browsers: 'chrome 78' } }],
-              '@babel/preset-react',
-            ],
+            // babelrc: false,
+            // presets: [
+            //   ['@babel/preset-env', { targets: { browsers: 'chrome 78' } }],
+            //   '@babel/preset-react',
+            // ],
             plugins: [
               ['@babel/plugin-transform-runtime', { regenerator: true }],
               ['@babel/plugin-proposal-class-properties', { loose: true }]

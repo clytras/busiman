@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite/no-important';
-import { Strings } from '../../lang/strings';
-import Globals from '../../Globals';
+import { Strings } from '@i18n';
+import Globals from '@app/globals';
 import {
     Accordion,
     AccordionItem,

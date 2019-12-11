@@ -7,7 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { copyStyles } from '../utils/DOM';
 import LogoLoader from './components/LogoLoader';
 
-import {Strings} from '../lang/strings';
+import {Strings} from '@i18n';
 import Button from '@material-ui/core/Button';
 import * as platform from 'platform';
 

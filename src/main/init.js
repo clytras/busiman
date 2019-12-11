@@ -2,7 +2,9 @@ import fs from 'fs';
 import fse from 'fs-extra';
 import path from 'path';
 import { app } from 'electron';
-import { DB } from '../db';
+import { success, fail, Errors } from '@utils/errors';
+import { DB } from '@db';
+import { Config } from '@db/models/Config';
 
 
 export async function initApp() {
@@ -10,23 +12,28 @@ export async function initApp() {
     ok: false
   }
 
-  // Create userData directory
-  if(!fs.existsSync(app.getPath('userData'))) {
-    try {
-      fs.mkdirSync(app.getPath('userData'), )
-    } catch(error) {
-      if(error.code !== 'EEXIST') {
-        return { ok: false, error }
-      }
-    }
-  }
+  // // Create userData directory
+  // if(!fs.existsSync(app.getPath('userData'))) {
+  //   try {
+  //     fs.mkdirSync(app.getPath('userData'), )
+  //   } catch(error) {
+  //     if(error.code !== 'EEXIST') {
+  //       return { ok: false, error }
+  //     }
+  //   }
+  // }
 
-  console.log('process.app.dataPath', process.app.dataPath);
-  console.log('process.app', process.app);
+  // console.log('process.app.dataPath', process.app.dataPath);
+  // console.log('process.app', process.app);
 
   try {
     fs.mkdirSync(process.app.dataPath, { recursive: true });
-  } catch {}
+  } catch(error) {
+    const { code } = error || {};
+    if(code && code !== 'EEXIST') {
+      return fail({ error });
+    }
+  }
 
   try {
     await fse.copy(
@@ -59,10 +66,39 @@ export async function initApp() {
 
     console.log('migrate done?');
 
-    return { ok: true }
+    process.app.config = Config.bindKnex(process.app.db.app);
+    process.app.db.dataConnection = await process.app.config.get('data.connection');
+
+    if(!process.app.db.dataConnection) {
+      return fail.internal({
+        code: Errors.DB.NotInitialized
+      });
+    }
+
+    if(!DB.validConfig(process.app.db.dataConnection, { mustHaveDatabase: true })) {
+      return fail.internal({
+        code: Errors.DB.InvalidConfig
+      });
+    }
+
+    process.app.db.data = new DB({
+      ...process.app.db.dataConnection,
+      useNullAsDefault: true,
+      migrations: {
+        tableName: process.app.db.migrationsName,
+        directory: path.resolve(process.app.db.migrationsPath, 'data')
+      }
+    });
+
+    if(!await process.app.db.data.exists()) {
+      return fail.internal({
+        code: Errors.DB.CantConnect
+      })
+    }
+
+    return success();
   } catch(error) {
     console.warn('create/migrate db error', error);
-    return { ok: false, error }
+    return fail({ error });
   }
-
 }

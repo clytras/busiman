@@ -13,6 +13,15 @@ main.init {
   align-items: center;
 }
 
+body.setup {
+  overflow: hidden;
+}
+
+main.setup {
+  display: flex;
+  height: 100%;
+}
+
 .app {
    color: blue;
 }

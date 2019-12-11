@@ -10,7 +10,7 @@ import { Titlebar, Color } from '@lytrax/custom-electron-titlebar';
 import NewWindow from 'react-new-window'
 // import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite/no-important';
-import {Strings} from '../lang/strings';
+import { Strings } from '@i18n';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SideNav from './components/SideNav';

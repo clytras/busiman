@@ -6,9 +6,13 @@ import { app, systemPreferences, ipcMain as ipc } from 'electron';
 import path from 'path';
 import url from 'url';
 import util from 'util';
-import { hasGPUEnabled } from '../utils';
+// import { hasGPUEnabled } from '../utils';
 import { initApp } from './init';
-import { InitWindow, MainWindow } from './windows';
+import { InitWindow, SetupWindow, MainWindow } from './windows';
+import { MsgBox } from '@utils/dialog';
+import { Errors } from '@utils/errors';
+import { Strings } from '@i18n';
+
 // import { hasConfigDb } from '../db';
 //require('electron-reload')(__dirname)
 
@@ -79,21 +83,51 @@ import { InitWindow, MainWindow } from './windows';
 
 
 const gotTheLock = app.requestSingleInstanceLock()
+let initWindow, setupWindow, mainWindow;
 
 if (!gotTheLock) {
   app.quit()
 } else {
-  const initWindow = new InitWindow();
-  const mainWindow = new MainWindow();
+  initWindow = new InitWindow();
+  setupWindow = new SetupWindow();
+  mainWindow = new MainWindow();
 
   ipc.on('init:done', async () => {
     console.log('got init:done');
-    await initApp();
-    mainWindow.create();
-    mainWindow.once('ready-to-show', () => {
-      initWindow.close();
-      mainWindow.show();
-    });
+
+    const { ok, internal, error } = await initApp();
+
+    console.log('initApp', ok, internal, error);
+
+    initWindow.close();
+
+    if(ok) {
+      createMainWindow();
+    } else if(internal) {
+      console.log('got internal', internal);
+
+      const { code } = internal;
+
+      if(code === Errors.DB.InvalidConfig) {
+        MsgBox.show({
+          type: 'warning',
+          message: Strings.messages.DBConnectionNotValid
+        });
+      } else if(code === Errors.DB.CantConnect) {
+        MsgBox.show({
+          type: 'warning',
+          message: Strings.messages.DBCantConnect
+        });
+      }
+
+      createSetupWindow({ appInit: { internal }});
+    } else if(error) {
+      MsgBox.show({
+        type: 'error',
+        message: Strings.messages.StartupError,
+        detail: error.toString()
+      })
+    }
   });
 
   app.on('second-instance', (event, commandLine, workingDirectory) => {
@@ -142,6 +176,29 @@ if (!gotTheLock) {
 }
 
 
+function createMainWindow() {
+  mainWindow.create();
+  mainWindow.once('ready-to-show', () => {
+    initWindow.close();
+    mainWindow.show();
+  });
+}
+
+function createSetupWindow(props) {
+  const propsHandler = 'setup:props';
+
+  ipc.handle(propsHandler, () => props);
+
+  setupWindow.create();
+  setupWindow
+  .once('ready-to-show', () => {
+    setupWindow.show();
+    setupWindow.openDevTools();
+  })
+  .on('closed', () => {
+    ipc.removeHandler(propsHandler);
+  });
+}
 
 
 // function createWindow() {
