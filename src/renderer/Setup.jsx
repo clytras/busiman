@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { hot } from 'react-hot-loader/root';
 import path from 'path';
@@ -8,12 +8,14 @@ import { makeStyles } from '@material-ui/core/styles';
 import { copyStyles } from '@utils/DOM';
 import { appTitle } from '@utils';
 import { Strings } from '@i18n';
+import { normalizeGreek } from 'lyxlib/utils/str';
 import bm from '@app/globals';
 
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import * as platform from 'platform';
 
+import MessageOverlay from '@renderer/components/MessageOverlay';
 
 import '@assets/fonts/MaterialDesignIcons/material-icons.css';
 import '@assets/fonts/Roboto/index.css';
@@ -32,18 +34,39 @@ function Setup({
   }
 }) {
   const classes = useStyles();
+  const [msgtype, setMsgtype] = useState('success');
 
   useLayoutEffect(() => {
     document.title = appTitle(Strings.titles.Installation);
   }, []);
 
   useEffect(() => {
-    
+    console.log('app.getLocale()', remote.app.getLocale());
+
+    const msgtint = () => {
+      console.log('set msgtype', msgtype, msgtype == 'success');
+
+      if(msgtype == 'success') {
+        console.log('set warn');
+        setMsgtype('warn');
+      } else {
+        console.log('set success');
+        setMsgtype('success');
+      }
+
+      setTimeout(msgtint, 2000);
+    };
+
+    msgtint();
+
+    // return () => clearInterval(msgtint);
   }, []);
 
   function handleClose() {
     
   }
+
+  console.log('msgtype render', msgtype);
 
   return (
     <React.Fragment>
@@ -51,17 +74,23 @@ function Setup({
       <div className={classes.container}>
         <header className={classes.header}>
           <img src={require('@assets/Logo_square_XS.png').default} className={classes.logo}/>
-          <Typography variant="h4" component="span" display="inline">
+          <Typography classes={{ root: classes.title }} variant="h4" component="span" display="inline">
             {Strings.titles.Installation}
           </Typography>
+          <MessageOverlay 
+            type={msgtype}
+            // title="Testing this message 👌" 
+            message={`But that doesn't really explain the pros and cons of each. I am looking for an explanation, and possibly a simple example (use case) highlighting those similarities / differences.
+
+Why would one use one over the other?`}/>
         </header>
         <section className={classes.page}></section>
         <footer className={classes.footer}>
           <Button variant="contained" onClick={handleClose}>
-            {Strings.titles.Previous}
+            {normalizeGreek(Strings.titles.Previous)}
           </Button>
           <Button variant="contained" onClick={handleClose} color="primary">
-            {Strings.titles.Next}
+            {normalizeGreek(Strings.titles.Next)}
           </Button>
         </footer>
       </div>
@@ -80,8 +109,13 @@ const useStyles = makeStyles(theme => ({
   },
   header: {
     display: 'flex',
+    position: 'relative',
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    userSelect: 'none'
+  },
+  title: {
+    color: '#000000ab'
   },
   logo: {
     width: 170,

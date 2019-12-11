@@ -14,6 +14,13 @@ export default {
     Installation: 'Installation',
     Next: 'Next',
     Previous: 'Previous',
+
+    Undo: 'Undo',
+    Redo: 'Redo',
+    Copy: 'Copy',
+    Cut: 'Cut',
+    Paste: 'Paste',
+    SelectAll: 'Select all'
   },
 
   messages: {

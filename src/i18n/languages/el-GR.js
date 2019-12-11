@@ -14,6 +14,13 @@ export default {
     Installation: 'Εγκατάσταση',
     Next: 'Επόμενο',
     Previous: 'Προηγούμενο',
+
+    Undo: 'Αναίρεση',
+    Redo: 'Επανάληψη',
+    Copy: 'Αντιγραφή',
+    Cut: 'Αποκοπή',
+    Paste: 'Επικόλληση',
+    SelectAll: 'Επιλογή όλων'
   },
 
   messages: {

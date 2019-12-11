@@ -9,7 +9,12 @@ export default {
     sideNavBg: '#f5f5f5', // whitesmoke,
     sideNavBorder: '#e6e6e6',
 
-    wizardPanel: '#0000000d'
+    wizardPanel: '#0000000d',
+
+    msg: {
+      info: '#fff',
+      
+    }
   }
 }
 

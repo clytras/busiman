@@ -7,8 +7,10 @@ import Init from './Init';
 import Setup from './Setup';
 import App from './App';
 import { Themed } from '@app/globals';
+import { setupContextMenus } from './menus';
 
 
+setupContextMenus();
 
 // Import the styles here to process them with webpack
 
