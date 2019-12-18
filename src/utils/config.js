@@ -1,4 +1,5 @@
 import Cryptr from 'lyxlib/utils/cryptr';
+import { encryptProperties, decryptProperties } from '@utils';
 import bm from '@app/globals';
 
 
@@ -40,4 +41,25 @@ export function decodeConfigData(data, {
       }
     }
   }
+}
+
+const DBConfigEncryptedProps = ['password', 'user', 'database', 'host', 'port'];
+
+export function encodeDBConfig(data, {
+  secret
+} = {}) {
+  return encodeConfigData(
+    encryptProperties(data, DBConfigEncryptedProps), {
+      secret
+    }
+  );
+}
+
+export function decodeDBConfig(data, {
+  secret
+} = {}) {
+  return decryptProperties(
+    decodeConfigData(data, { secret }),
+    DBConfigEncryptedProps
+  );
 }
