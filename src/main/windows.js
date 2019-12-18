@@ -214,6 +214,7 @@ export class SetupWindow extends Window {
       height: 480,
       width: 640,
       maximizable: false,
+      resizable: false,
       show: false,
       webPreferences: {
         nodeIntegration: true

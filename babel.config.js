@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 
 module.exports = {
   presets: ["@babel/preset-env", "@babel/preset-react"],
@@ -15,7 +16,9 @@ module.exports = {
         "@main": "./src/main",
         "@renderer": "./src/renderer",
 
-        "lyxlib": process.env.LYXLIB_PATH
+        "lyxlib": process.env.LYXLIB_PATH,
+
+        "react": path.resolve(__dirname, "node_modules/react"),
       }
     }]
   ]

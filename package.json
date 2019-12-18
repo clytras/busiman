@@ -24,11 +24,16 @@
     "dist": "rimraf release && electron-builder",
     "clean:release": "rimraf release",
     "test:db:reset": "node ./scripts/resetTestDb.js",
-    "test:db": "jest \"db\\.(.*)\\.test\\.js\" --verbose"
+    "test:db": "jest \"db\\.(.*)\\.test\\.js\" --verbose",
+    "test:config": "jest \"config\\.(.*)\\.test\\.js\" --verbose",
+    "test:utils": "jest \"utils\\.(.*)\\.test\\.js\" --verbose"
   },
   "author": "Christos Lytras <christos.lytras@gmail.com>",
   "license": "MIT",
   "browserslist": "electron >= 7.1",
+  "jest": {
+    "setupFilesAfterEnv": ["jest-extended"]
+  },
   "build": {
     "productName": "BusinessMan",
     "copyright": "Copyright © 2020 ${author}",
@@ -120,6 +125,7 @@
     "electron-reload": "^1.5.0",
     "extract-loader": "^3.1.0",
     "file-loader": "^5.0.2",
+    "framer-motion": "^1.7.0",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
     "glob-fs": "^0.1.7",
@@ -127,11 +133,14 @@
     "html-webpack-plugin": "^3.2.0",
     "is-electron-renderer": "^2.0.1",
     "jest": "^24.9.0",
+    "jest-extended": "^0.11.2",
     "knex": "^0.20.3",
     "luxon": "^1.21.3",
-    "material-design-icons": "^3.0.1",
+    "mdi-material-ui": "^6.9.0",
     "mkdir": "^0.0.2",
     "mysql2": "^2.0.1",
+    "nanoid": "^2.1.8",
+    "node-emoji": "^1.10.0",
     "node-sass": "^4.13.0",
     "nodemon": "^2.0.1",
     "npm-run-all": "^4.1.5",
@@ -156,12 +165,14 @@
     "styled-components": "^4.4.1",
     "tedious": "^6.6.2",
     "typeface-roboto": "^0.0.75",
+    "validator": "^12.1.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.9.0",
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "color": "^3.1.2",
     "sqlite3": "^4.1.0"
   }
 }

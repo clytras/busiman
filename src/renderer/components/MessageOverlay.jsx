@@ -1,40 +1,51 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import { nl2br } from 'lyxlib/utils/str';
 
+import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import InfoIcon from '@material-ui/icons/Info';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import WarningIcon from '@material-ui/icons/Warning';
 import ErrorIcon from '@material-ui/icons/Error';
 import HelpIcon from '@material-ui/icons/Help';
-
-import Icon from '@material-ui/core/Icon';
+import CloseIcon from '@material-ui/icons/Close';
 
 
 export default function({
+  show: inShow = true,
   type = 'info',
   icon = 'default',
   title,
-  message
+  message,
+
+  dismissable = false
 }) {
   const classes = useStyles({ type, icon });
+  const [visible, setVisible] = useState(inShow);
 
+  useEffect(() => setVisible(inShow), [inShow]);
 
-  return (
+  const handleDismiss = () => setVisible(false);
+
+  return visible && (
     <div className={classes.container}>
       <div className={classes.content}>
-        {/* {icons.selectIcon(icon, type, classes.icon)} */}
-        <div className={classes.icon}>
-          {/* {type === 'success' ? <Icon fontSize="inherit">add_circle</Icon> : <Icon fontSize="inherit">star</Icon>} */}
-          {type === 'success' ? <CheckCircleIcon fontSize="inherit"/> : <WarningIcon fontSize="inherit"/>}
-        </div>
+        {icons.selectIcon(icon, type, classes.icon)}
         <div className={clsx(classes.messageContainer, 'MenuCopyText')}>
-          {!!title && (
-            <Typography classes={{ root: classes.messageTitle }} variant="h6" component="h6">
-              {title.trim()}
-            </Typography>
+          {(!!title || dismissable) && (
+            <div className={classes.header}>
+              {!!title && (
+                <Typography classes={{ root: classes.messageTitle }} variant="h6" component="h6">
+                  {title.trim()}
+                </Typography>
+              )}
+              {dismissable && (
+                <IconButton classes={{ root: classes.headerIconButton }} onClick={handleDismiss} size="small" aria-label="close">
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              )}
+            </div>
           )}
           {!!message && (
             <Typography classes={{ root: classes.messageText }} variant="body2" component="p">
@@ -56,7 +67,7 @@ const colors = {
     backgroundColor: 'hsla(116, 75%, 94%, 0.75)',
     borderColor: '#04ff00'
   },
-  warn: {
+  warning: {
     backgroundColor: 'hsla(58, 100%, 89%, 0.75)',
     borderColor: 'yellow'
   },
@@ -67,11 +78,11 @@ const colors = {
 }
 
 const icons = {
-  info: (type) => <InfoIcon fontSize="inherit" type={type}/>,
-  success: (type) => <CheckCircleIcon fontSize="inherit" type={type}/>,
-  question: (type) => <HelpIcon fontSize="inherit" type={type}/>,
-  warn: (type) => <WarningIcon fontSize="inherit" type={type}/>,
-  error: (type) => <ErrorIcon fontSize="inherit" type={type}/>,
+  info: () => <InfoIcon fontSize="inherit"/>,
+  success: () => <CheckCircleIcon fontSize="inherit"/>,
+  question: () => <HelpIcon fontSize="inherit"/>,
+  warning: () => <WarningIcon fontSize="inherit"/>,
+  error: () => <ErrorIcon fontSize="inherit"/>,
 
   selectIconColor: (icon, type) => {
     let result = 'inherit';
@@ -104,12 +115,10 @@ const icons = {
       _icon = icons[type];
     }
 
-    console.log('_icon', icon, type);
-
     if(_icon) {
       return (
         <div className={className}>
-          {_icon(type)}
+          {_icon()}
         </div>
       );
     }
@@ -144,6 +153,18 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(0, 2),
     fontSize: '50pt',
     filter: 'drop-shadow(0px 0px 5px rgba(0, 0, 0, .4))'
+  },
+
+  header: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  headerIconButton: {
+    width: 24,
+    height: 24,
+    marginRight: theme.spacing(1)
   },
   messageContainer: {
     display: 'flex',

@@ -1,0 +1,14 @@
+Format: JSON
+Root: Object
+Fields:
+  version: string // app version
+  _: string encrypted with (aes-256-gcm), result = b64(salt.iv.authTag.enc)
+    sig: string // 'business-manager-config'
+    data: Object
+      db: Object
+        dialect: string
+        host: string
+        port: number
+        database: string
+        user: string
+        password: string

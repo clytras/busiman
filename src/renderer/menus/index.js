@@ -60,7 +60,7 @@ export function setupContextMenus() {
 
       const { className } = node;
 
-      if(/^MenuCopy/.test(className)) {
+      if(/(\s|^)MenuCopy/.test(className)) {
         const copyMenuItem = CopyMenu.getMenuItemById('copy');
         copyMenuItem.enabled = hasSelection;
         CopyMenu.popup(remote.getCurrentWindow());

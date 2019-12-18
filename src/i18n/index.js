@@ -1,5 +1,6 @@
 import LocalizedStrings from 'react-localization';
 import Languages, { supportedLanguageDefs } from './languages';
+import Texts from './texts';
 import {
   protoFormatPlural,
   protoSelectString,
@@ -22,5 +23,6 @@ const Strings = new LocalizedStrings(Languages);
 
 export {
   Strings,
+  Texts,
   supportedLanguageDefs
 };

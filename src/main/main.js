@@ -10,7 +10,7 @@ import util from 'util';
 import { initApp } from './init';
 import { InitWindow, SetupWindow, MainWindow } from './windows';
 import { MsgBox } from '@utils/dialog';
-import { Errors } from '@utils/errors';
+import { Errors, translateInternal } from '@utils/errors';
 import { Strings } from '@i18n';
 
 // import { hasConfigDb } from '../db';
@@ -95,7 +95,7 @@ if (!gotTheLock) {
   ipc.on('init:done', async () => {
     console.log('got init:done');
 
-    const { ok, internal, error } = await initApp();
+    let { ok, internal, error } = await initApp();
 
     console.log('initApp', ok, internal, error);
 
@@ -106,21 +106,29 @@ if (!gotTheLock) {
     } else if(internal) {
       console.log('got internal', internal);
 
+      const translation = translateInternal(internal);
       const { code } = internal;
 
-      if(code === Errors.DB.InvalidConfig) {
-        MsgBox.show({
-          type: 'warning',
-          message: Strings.messages.DBConnectionNotValid
-        });
-      } else if(code === Errors.DB.CantConnect) {
-        MsgBox.show({
-          type: 'warning',
-          message: Strings.messages.DBCantConnect
-        });
+      if([
+        Errors.DB.InvalidConfig,
+        Errors.DB.CantConnect
+      ].indexOf(code) !== -1) {
+        MsgBox.show(translation);
       }
 
-      createSetupWindow({ appInit: { internal }});
+      // if(code === Errors.DB.InvalidConfig) {
+      //   MsgBox.show({
+      //     type: 'warning',
+      //     message: Strings.messages.DBConnectionNotValid
+      //   });
+      // } else if(code === Errors.DB.CantConnect) {
+      //   MsgBox.show({
+      //     type: 'warning',
+      //     message: Strings.messages.DBCantConnect
+      //   });
+      // }
+
+      createSetupWindow({ appInit: { internal: { code, translation }}});
     } else if(error) {
       MsgBox.show({
         type: 'error',

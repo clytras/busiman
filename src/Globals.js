@@ -4,6 +4,21 @@ import blue from '@material-ui/core/colors/blue';
 import pink from '@material-ui/core/colors/pink';
 
 export default {
+  keys: {
+    genEnc: 'f47361ddac9c8c61b399b4da1562b045'
+  },
+  specs: {
+    bmcSignature: 'business-manager-config',
+    db: {
+      supported: [
+        'sqlite',
+        'mysql',
+        'mssql',
+        'pg',
+        'oracle'
+      ]
+    }
+  },
   colors: {
     frameBorders: '#e2e2e2',
     sideNavBg: '#f5f5f5', // whitesmoke,
