@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom';
 import Init from './Init';
 import Setup from './Setup';
 import App from './App';
-import { Themed } from '@app/globals';
+import { Themed } from '@utils/theme';
 import { setupContextMenus } from './menus';
 
 

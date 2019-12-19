@@ -23,6 +23,7 @@
     "postinstall": "electron-builder install-app-deps",
     "dist": "rimraf release && electron-builder",
     "clean:release": "rimraf release",
+    "genTestDbConfigFile": "npx -p @babel/core -p @babel/node babel-node ./scripts/genTestDbConfigFile.js",
     "test:db:reset": "node ./scripts/resetTestDb.js",
     "test:db": "jest \"db\\.(.*)\\.test\\.js\" --verbose",
     "test:config": "jest \"config\\.(.*)\\.test\\.js\" --verbose",

@@ -9,12 +9,14 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { withStyles } from '@material-ui/core/styles';
 import { Strings, Texts } from '@i18n';
 import { normalizeGreek } from 'lyxlib/utils/str';
+import { fileDialogFilters } from '@utils/dialog';
 import { appTitle } from '@utils';
 import { Errors } from '@utils/errors';
 import bm from '@app/globals';
 
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import NewInstallationIcon from '@material-ui/icons/PlaylistAdd';
@@ -24,6 +26,7 @@ import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 
 import HomeImportOutlineIcon from 'mdi-material-ui/HomeImportOutline';
 import DatabaseIcon from 'mdi-material-ui/Database';
+import FileUndoIcon from 'mdi-material-ui/FileUndo';
 
 import MessageOverlay from '@renderer/components/MessageOverlay';
 import LongButton from './LongButton';
@@ -49,6 +52,7 @@ class Setup extends React.Component {
     breadcrumbs: [],
     nextButtonText: normalizeGreek(Strings.titles.Previous),
     previousButtonText: normalizeGreek(Strings.titles.Previous),
+    configFile: '',
     showNextButton: false,
     showPreviousButton: false,
     showConfigFilePasswordPrompt: false,
@@ -90,7 +94,26 @@ class Setup extends React.Component {
     console.log('handleDBTypeChange', dbType);
 
     if(dbType === 'config') {
-      this.setState({ showConfigFilePasswordPrompt: true, dbType });
+      //this.setState({ showConfigFilePasswordPrompt: true, dbType });
+
+
+      const { dialog, getCurrentWindow } = remote;
+
+      console.log('filtgers', fileDialogFilters(['bmc', 'all']));
+
+      dialog.showOpenDialog(getCurrentWindow(), {
+        title: Strings.titles.DBConfigFile,
+        filters: fileDialogFilters(['bmc', 'all']),
+        properties: ['openFile']
+      })
+      .then(({ canceled, filePaths }) => {
+        if(canceled) {
+          return this.setState({ dbType: '' });
+        }
+      })
+      .catch(error => {
+        
+      });
     } else {
       this.setState({ dbType });
     }
@@ -208,35 +231,45 @@ class Setup extends React.Component {
     const dbTypeTexts = {...Texts.DB.Types, config: Strings.titles.FromConfigFile};
     const {
       showConfigFilePasswordPrompt,
+      configFile,
       dbType,
       dbPort
     } = this.state;
 
-    console.log('renderPage_DBConnectionTools', dbType);
+    console.log('renderPage_DBConnectionTools', typeof(dbType), `'${dbType}'`);
 
     return (
       <div className={classes.dbConnectionTools}>
         <div className={classes.dbConnectionTools_connectionSettings}>
-          <InputSelect label={Strings.titles.DBType}
-            className={clsx(classes.inputRow, classes.dbConnectionTools_inputDBType)}
-            value={dbType}
-            values={dbTypes}
-            texts={dbTypeTexts}
-            onChange={this.handleDBTypeChange}
-          />
-          {/* <InputFile label={"Select file"}
-            className={clsx(classes.inputRow, classes.inputFullWidth)}
-            onFileSelect={file => console.log('got file', file)}
-            dialog={{
-              title: 'Select file dialog',
-              defaultPath: 'C:\\Dev',
-              buttonLabel: 'Btn label!!',
-              filters: [{
-                name: 'All Files', extensions: ['*']
-              }],
-              showSave: true
-            }}
-          /> */}
+          <div className={clsx(classes.inputRow, classes.inputRowButtons)}>
+            <InputSelect label={Strings.titles.DBType}
+              className={classes.dbConnectionTools_inputDBType}
+              classes={{ helperText: classes.dbConnectionTools_inputDBTypeHelper }}
+              value={dbType}
+              values={dbTypes}
+              texts={dbTypeTexts}
+              helperText={configFile}
+              onChange={this.handleDBTypeChange}
+            />
+            {!!configFile && (
+              <IconButton onClick={() => {}}>
+                <FileUndoIcon/>
+              </IconButton>
+            )}
+            {/* <InputFile label={"Select file"}
+              className={clsx(classes.inputRow, classes.inputFullWidth)}
+              onFileSelect={file => console.log('got file', file)}
+              dialog={{
+                title: 'Select file dialog',
+                defaultPath: 'C:\\Dev',
+                buttonLabel: 'Btn label!!',
+                filters: [{
+                  name: 'All Files', extensions: ['*']
+                }],
+                showSave: true
+              }}
+            /> */}
+          </div>
 
           <div className={classes.inputRow}>
             <TextField label={Strings.titles.ServerAddress} 
@@ -432,7 +465,8 @@ const styles = theme => ({
 
     '&:hover': {
       borderColor: theme.palette.secondary.light,
-      backgroundColor: Color(theme.palette.secondary.main).alpha(.08).string()
+      //backgroundColor: Color(theme.palette.secondary.main).alpha(.08).string()
+      backgroundColor: Color(theme.palette.secondary.main).lighten(.8).string()
     }
   },
 
@@ -440,6 +474,10 @@ const styles = theme => ({
     display: 'flex',
     justifyContent: 'space-between',
     marginBottom: theme.spacing(1)
+  },
+  inputRowButtons: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start'
   },
   inputFullWidth: {
     width: '100%'
@@ -508,6 +546,14 @@ const styles = theme => ({
   },
   dbConnectionTools_inputDBType: {
     width: 240
+  },
+  dbConnectionTools_inputDBTypeHelper: {
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    direction: 'rtl',
+    textAlign: 'left',
+    color: theme.palette.primary.main
   },
   dbConnectionTools_inputPort: {
     width: 100

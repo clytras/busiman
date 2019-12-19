@@ -41,6 +41,7 @@ export default {
     FromConfigFile: 'From configuration file',
     ServerAddress: 'Server address',
     ConfigurationFilePassword: 'Configuration file password',
+    DBConfigFile: 'Database configuration file',
   },
 
   messages: {
@@ -76,6 +77,15 @@ export default {
       },
       Advanced: {
         Description: 'Connect to other local or remote databases'
+      }
+    }
+  },
+
+  system: {
+    fileDialog: {
+      filters: {
+        all: 'All files',
+        bmc: 'Business Manager configuration'
       }
     }
   }

@@ -1,13 +1,13 @@
 import Cryptr from 'lyxlib/utils/cryptr';
-import { encryptProperties, decryptProperties } from '@utils';
+import { encryptProperties, decryptProperties } from '@utils/crypt';
 import bm from '@app/globals';
 
 
 export function encodeConfigData(data, {
   secret,
-  version
+  version,
+  sig = bm.specs.bmcSignature
 } = {}) {
-  const sig = bm.specs.bmcSignature;
   let _ = { sig, data }
 
   if(secret) {
@@ -20,7 +20,8 @@ export function encodeConfigData(data, {
 
 export function decodeConfigData(data, {
   secret,
-  validate = true
+  validate = true,
+  validateSig = bm.specs.bmcSignature
 } = {}) {
   if('_' in data) {
     let { version, _ } = data;
@@ -32,7 +33,7 @@ export function decodeConfigData(data, {
 
     if(typeof(_) === 'object') {
       if(validate) {
-        if('sig' in _ && 'data' in _) {
+        if('sig' in _ && 'data' in _ && _.sig === validateSig) {
           const { data, ...rest } = _;
           return version !== undefined ? { version, ...rest, data } : { ...rest, data }
         }
@@ -43,23 +44,48 @@ export function decodeConfigData(data, {
   }
 }
 
+export function isValidConfigData(data) {
+  let valid = false, encrypted;
+
+  if('_' in data) {
+    const { _ } = data;
+
+    if(typeof(_) === 'string') {
+      valid = true;
+      encrypted = true;
+    } else if(typeof(_) === 'object') {
+      const { sig, data } = _ || {};
+
+      if(sig && data) {
+        valid = true;
+        encrypted = false;
+      }
+    }
+  }
+
+  return { valid, encrypted }
+}
+
 const DBConfigEncryptedProps = ['password', 'user', 'database', 'host', 'port'];
 
 export function encodeDBConfig(data, {
   secret
 } = {}) {
   return encodeConfigData(
-    encryptProperties(data, DBConfigEncryptedProps), {
-      secret
+    encryptProperties(data, DBConfigEncryptedProps),
+    {
+      secret,
+      sig: bm.specs.bmcDBSignature
     }
   );
 }
 
 export function decodeDBConfig(data, {
-  secret
+  secret,
+  validate = true
 } = {}) {
   return decryptProperties(
-    decodeConfigData(data, { secret }),
+    decodeConfigData(data, { secret, validate, validateSig: bm.specs.bmcDBSignature }),
     DBConfigEncryptedProps
   );
 }

@@ -11,7 +11,6 @@ import IconButton from '@material-ui/core/IconButton';
 import FileSettingsIcon from 'mdi-material-ui/FileSettings';
 
 
-
 export default function({
   className,
   label,

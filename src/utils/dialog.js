@@ -1,4 +1,5 @@
 import { dialog } from 'electron';
+import { Strings } from '@i18n';
 
 const OK = 'OK';
 const Cancel = 'Cancel';
@@ -8,7 +9,6 @@ const Retry = 'Retry';
 const Close = 'Close';
 
 export class MsgBox {
-
   static Buttons = {
     OK: [OK],
     Cancel: [Cancel],
@@ -49,4 +49,25 @@ export class MsgBox {
       cancelId 
     });
   }
+}
+
+export function fileDialogFilters(filters = ['all']) {
+  const result = [];
+
+  for(let filter of filters) {
+    const name = Strings.system.fileDialog.filters[filter];
+    let extensions;
+
+    switch(filter) {
+      case 'all':
+        extensions = ['*'];
+        break;
+      default:
+        extensions = [filter];
+    }
+
+    result.push({ name, extensions });
+  }
+
+  return result;
 }

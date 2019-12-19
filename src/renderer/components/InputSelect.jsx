@@ -12,9 +12,10 @@ import Divider from '@material-ui/core/Divider';
 
 export default function({
   className,
+  classes = {},
   label,
   helperText,
-  value: passedValue,
+  value: passedValue = '',
   values,
   texts,
   disabled = false,
@@ -22,14 +23,11 @@ export default function({
   onChange,
   inputProps
 }) {
-  const classes = useStyles();
-  const [value, setValue] = useState(passedValue === undefined && '');
+  const localClasses = useStyles();
+  const [value, setValue] = useState(passedValue);
   const [internalId] = useState(nanoid());
 
-  useEffect(() => {
-    console.log('input select useEffect', passedValue);
-    setValue(passedValue);
-  }, [passedValue]);
+  useEffect(() => setValue(passedValue), [passedValue]);
 
   function handleChange({ target: { value }}) {
     if(passedValue === undefined) {
@@ -43,8 +41,6 @@ export default function({
   !id && (id = `input-select-${internalId}`);
   !name && (name = id);
 
-  console.log('input select render', passedValue, value);
-
   return (
     <FormControl className={className} error={error}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
@@ -57,10 +53,12 @@ export default function({
         {values.map((v, i) => v ? (
           <MenuItem dense key={`${id}-item-${v}`} value={v}>{v in texts ? texts[v] : texts[i]}</MenuItem>
         ) : (
-          <Divider key={`${id}-devider-${i}`} className={classes.divider}/>
+          <Divider key={`${id}-devider-${i}`} className={localClasses.divider}/>
         ))}
       </Select>
-      {!!helperText && <FormHelperText>{helperText}</FormHelperText>}
+      {!!helperText && <FormHelperText classes={{
+        root: classes.helperText
+      }}>{helperText}</FormHelperText>}
     </FormControl>
   );
 }

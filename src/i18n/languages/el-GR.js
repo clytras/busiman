@@ -41,6 +41,7 @@ export default {
     FromConfigFile: 'Από αρχείο ρυθμίσεων',
     ServerAddress: 'Διεύθυνση διακομιστή',
     ConfigurationFilePassword: 'Κωδικός αρχείου ρυθμίσεων',
+    DBConfigFile: 'Αρχείο ρυθμίσεων βάσης δεδομένων',
   },
 
   messages: {
@@ -76,6 +77,15 @@ export default {
       },
       Advanced: {
         Description: 'Σύνδεση σε άλλες τοπικές ή απομακρυσμένες βάσεις δεδομένων'
+      }
+    }
+  },
+
+  system: {
+    fileDialog: {
+      filters: {
+        all: 'Όλα τα αρχεία',
+        bmc: 'Ρυθμίσεις Business Manager'
       }
     }
   }
