@@ -37,11 +37,14 @@ export default function({
   },
   inputProps
 }) {
-  const [value, setValue] = useState(passedValue);
+  const [value, setValue] = useState();
   const [internalId] = useState(nanoid());
 
   useLayoutEffect(() => {
-    setValue(passedValue);
+    if(passedValue !== value) {
+      setValue(passedValue);
+      onChange && onChange(passedValue);
+    }
   }, [passedValue]);
 
   function handleOpenClick() {
@@ -67,20 +70,20 @@ export default function({
     });
 
     if(result !== undefined) {
-      setValue(result);
-      onFileSelect && onFileSelect(result);
-      onChange && onChange(result);
+      const file = Array.isArray(result) ? result[0] : result;
+      setValue(file);
+      onFileSelect && onFileSelect(file);
+      onChange && onChange(file);
     }
 
   }
 
   function handleChange({ target: { value }}) {
-    console.log('input file change', value);
     setValue(value);
     onChange && onChange(value);
   }
 
-  let { name, id } = inputProps || {};
+  let { name, id, ...restInputProps } = inputProps || {};
 
   !id && (id = `input-file-${internalId}`);
   !name && (name = id);
@@ -89,6 +92,7 @@ export default function({
     <FormControl className={className} error={error}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
       <Input
+        {...restInputProps}
         id={id}
         name={name}
         value={value}

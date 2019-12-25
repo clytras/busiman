@@ -1,6 +1,8 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
 import path from 'path';
+import util from 'util';
+import fs from 'fs';
 import { remote, ipcRenderer as ipc } from 'electron';
 import clsx from 'clsx';
 import Color from 'color';
@@ -10,10 +12,15 @@ import { withStyles } from '@material-ui/core/styles';
 import { Strings, Texts } from '@i18n';
 import { normalizeGreek } from 'lyxlib/utils/str';
 import { fileDialogFilters } from '@utils/dialog';
+import { DB, isDBTypeSQLite, isDBTypeSupported } from '@db';
+import { setupDBData } from '@renderer/ipc/db/setup';
+import { loadDBConfigFile, encryptDBProperties } from '@utils/config';
+import { MsgBox } from '@utils/dialog';
 import { appTitle } from '@utils';
-import { Errors } from '@utils/errors';
+import { Errors, translateInternal, fail } from '@utils/errors';
 import bm from '@app/globals';
 
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -26,10 +33,13 @@ import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 
 import HomeImportOutlineIcon from 'mdi-material-ui/HomeImportOutline';
 import DatabaseIcon from 'mdi-material-ui/Database';
+import DatabaseCheckIcon from 'mdi-material-ui/DatabaseCheck';
 import FileUndoIcon from 'mdi-material-ui/FileUndo';
+import FinishedSuccessIcon from 'mdi-material-ui/CheckboxMultipleMarkedCircleOutline';
 
 import MessageOverlay from '@renderer/components/MessageOverlay';
 import LongButton from './LongButton';
+import LoadingButton from '@renderer/components/LoadingButton';
 import InputSelect from '@renderer/components/InputSelect';
 import InputFile from '@renderer/components/InputFile';
 import InputPassword from '@renderer/components/InputPassword';
@@ -44,62 +54,137 @@ import { setPriority } from 'os';
 class Setup extends React.Component {
   static defaultProps = {}
   state = {
+    loading: false,
     newInstallation: false,
+    testingConnection: false,
+    finished: false,
     pages: {
       stack: [],
       // current
     },
     breadcrumbs: [],
-    nextButtonText: normalizeGreek(Strings.titles.Previous),
-    previousButtonText: normalizeGreek(Strings.titles.Previous),
+    nextButtonText: normalizeGreek(Strings.titles.Next),
+    previousButtonText: normalizeGreek(Strings.titles.Back),
     configFile: '',
+    configFilePassword: '',
+    configFilePasswordError: false,
     showNextButton: false,
     showPreviousButton: false,
+    showNewInstallationButton: true,
+    enableNextButton: false,
     showConfigFilePasswordPrompt: false,
+    sqliteError: '',
 
     mode: '', // new | existing | error
     newType: '', // Personal | Business
-    dbType: '', // local | config | <dbtypes>
+    dbType: '', // local | <dbtypes>
     dbFile: '', // for SQLite
     dbHost: '',
     dbPort: '',
-    dbUSer: '',
-    dbPassword: ''
+    dbUser: '',
+    dbPassword: '',
+    dbDatabase: ''
   }
 
   constructor(props) {
     super(props);
 
+    this.resetDBInputs = this.resetDBInputs.bind(this);
     this.handleDBTypeChange = this.handleDBTypeChange.bind(this);
+    
+    this.handleHostChange = this.handleHostChange.bind(this);
     this.handlePortChange = this.handlePortChange.bind(this);
+    this.handleUserChange = this.handleUserChange.bind(this);
+    this.handlePasswordChange = this.handlePasswordChange.bind(this);
+    this.handleDatabaseChange = this.handleDatabaseChange.bind(this);
+    this.handleConfigPasswordChange = this.handleConfigPasswordChange.bind(this);
+    this.handleConfigPasswordConfirm = this.handleConfigPasswordConfirm.bind(this);
+    this.handleConfigPasswordClose = this.handleConfigPasswordClose.bind(this);
+    this.handleUnloadConfigFile = this.handleUnloadConfigFile.bind(this);
+
+    this.applyConfigFilePassword = this.applyConfigFilePassword.bind(this);
+    this.applyConfigFileData = this.applyConfigFileData.bind(this);
+    
+    this.handleSQLiteSelectFile = this.handleSQLiteSelectFile.bind(this);
+    this.canTestConnection = this.canTestConnection.bind(this);
+    this.testConnection = this.testConnection.bind(this);
     this.goPreviousPage = this.goPreviousPage.bind(this);
   }
 
   componentDidMount() {
-    const { internal } = this.props.appInit || {};
-    const { code, translated: msg } = internal || {};
+    const { internal, connection } = this.props.appInit || {};
+    const { code, translated } = internal || {};
     const newInstallation = code === Errors.DB.NotInitialized;
     const stack = [newInstallation ? 'SelectInstallation' : 'DBConnectionTools'];
     const current = 0;
+    const mode = !!code ? 'error' : '';
+
+    let msg;
+  
+    if(code === Errors.DB.CantConnect) {
+      msg = {
+        type: 'warning',
+        title: Strings.messages.DBProblem,
+        message: Strings.expand(Strings.messages.CantConnectToDBCheckInfo),
+      }
+    } else if(code) {
+      msg = translateInternal(internal);
+    }
+
+    const {
+      client: dbType = '',
+      connection: {
+        filename: dbFile = '',
+        host: dbHost = '',
+        port: dbPort = '',
+        user: dbUser = '',
+        password: dbPassword = '',
+        database: dbDatabase = ''
+      } = {}
+    } = connection || {};
+
+    // const stack = ['Finished'];
+    // const current = 0;
+
+    // (async () => {
+    //   console.log('conf tb', (new Date).getTime());
+    //   const result = await process.app.config.get('test', 'TEST DEF');
+    //   console.log('conf te', (new Date).getTime());
+    //   console.log(`process.app get test "${result}"`);
+    // })();
+    
 
     document.title = appTitle(Strings.titles.Installation);
-    this.setState({ pages: { stack, current }, newInstallation, msg });
+    this.setState({
+      mode,
+      pages: { stack, current },
+      newInstallation,
+      msg,
+      dbType, dbFile, dbHost, dbPort, dbUser, dbPassword, dbDatabase
+    });
   }
 
   componentWillUnmount() {
 
   }
 
-  handleDBTypeChange(dbType) {
-    console.log('handleDBTypeChange', dbType);
+  resetDBInputs(ext = {}) {
+    this.setState({
+      dbFile: '',
+      dbHost: '',
+      dbPort: '',
+      dbUser: '',
+      dbPassword: '',
+      dbDatabase: '',
+      ...ext
+    });
+  }
 
+  handleDBTypeChange(dbType) {
     if(dbType === 'config') {
       //this.setState({ showConfigFilePasswordPrompt: true, dbType });
 
-
       const { dialog, getCurrentWindow } = remote;
-
-      console.log('filtgers', fileDialogFilters(['bmc', 'all']));
 
       dialog.showOpenDialog(getCurrentWindow(), {
         title: Strings.titles.DBConfigFile,
@@ -107,25 +192,144 @@ class Setup extends React.Component {
         properties: ['openFile']
       })
       .then(({ canceled, filePaths }) => {
+        // console.log(dbType, canceled, filePaths);
+
         if(canceled) {
           return this.setState({ dbType: '' });
         }
+
+        const configFile = Array.isArray(filePaths) ? filePaths[0] : filePaths;
+        const {
+          ok, data, encrypted, internal, error
+        } = loadDBConfigFile(configFile);
+
+        // console.log('handleDBTypeChange', ok, data, encrypted, internal, error)
+
+        if(ok) {
+          // if(encrypted) {
+          //   console.log('encrypted', configFile);
+          //   this.setState({ configFile, showConfigFilePasswordPrompt: true })
+          // } else {
+          //   this.applyConfigFileData(data);
+          // }
+          if(!encrypted) {
+            this.applyConfigFileData(data);
+          }
+          this.setState({ configFile, showConfigFilePasswordPrompt: !!encrypted })
+        } else if(internal) {
+          let detail = error ? error.toString() : undefined;
+          MsgBox.show(translateInternal(internal, { detail }), getCurrentWindow());
+        } else if(error) {
+          MsgBox.show({
+            type: 'error',
+            message: Strings.messages.LoadingFileError,
+            detail: error.toString()
+          }, getCurrentWindow());
+        } else {
+          this.setState({ dbType: '', configFile: '', configFilePassword: '' });
+        }
       })
       .catch(error => {
-        
+        MsgBox.show({
+          type: 'error',
+          message: Strings.messages.LoadingFileError,
+          detail: error.toString()
+        }, getCurrentWindow());
       });
     } else {
-      this.setState({ dbType });
+      const { configFile } = this.state;
+      if(configFile) {
+        this.resetDBInputs({ dbType, configFile: '', configFilePassword: '' })
+      } else {
+        this.setState({ dbType, configFile: '', configFilePassword: '' });
+      }
     }
   }
 
+  handleHostChange = ({ target: { value: dbHost }}) => this.setState({ dbHost });
   handlePortChange({ target: { value: dbPort }}) {
     if(!dbPort.length || isInt(dbPort, { min: 1, max: 0x10000 -1 })) {
       this.setState({ dbPort });
     }
   }
+  handleUserChange = ({ target: { value: dbUser }}) => this.setState({ dbUser });
+  handlePasswordChange = dbPassword => this.setState({ dbPassword });
+  handleDatabaseChange = ({ target: { value: dbDatabase }}) => this.setState({ dbDatabase });
 
-  goNextPage(page, breadcrumb) {
+  handleConfigPasswordChange = configFilePassword => {
+    this.setState({ configFilePassword, configFilePasswordError: false });
+  }
+
+  handleConfigPasswordConfirm() {
+    this.setState({
+      configFilePassword: '',
+      configFilePasswordError: false,
+      showConfigFilePasswordPrompt: false
+    });
+  }
+
+  handleConfigPasswordClose() {
+    this.setState({
+      dbType: '',
+      configFile: '',
+      configFilePassword: '',
+      configFilePasswordError: false,
+      showConfigFilePasswordPrompt: false
+    });
+  }
+
+  handleUnloadConfigFile() {
+    this.setState({
+      configFile: '',
+      dbType: '',
+      dbFile: '',
+      dbHost: '',
+      dbPort: '',
+      dbUser: '',
+      dbPassword: '',
+      dbDatabase: ''
+    });
+  }
+
+  handleSQLiteSelectFile(dbFile) {
+    const { mode } = this.state;
+
+    console.log('handleSQLiteSelectFile', dbFile, mode, fs.existsSync(dbFile));
+
+    if(!dbFile) {
+      return this.setState({ dbFile, sqliteError: '' });
+    }
+
+    if(mode !== 'new' && !fs.existsSync(dbFile)) {
+      return this.setState({ dbFile, sqliteError: Strings.messages.FileNotFound});
+    }
+
+    this.setState({ dbFile, sqliteError: '' });
+  }
+
+  handleSelectNewType(newType) {
+    this.setState({ newType });
+    this.goNextPage('SelectLocalOrConnectTo');
+
+  }
+
+  handleSelectInstallation(mode) {
+    this.setState({ mode });
+
+    if(mode === 'new') {
+      this.goNextPage('SelectNewType', Strings.titles.NewInstallation);
+    } else {
+      this.goNextPage('DBConnectionTools', Strings.titles.ConnectToDB);
+    }
+  }
+
+  handleReload() {
+    const { app } = remote;
+    app.relaunch();
+    app.exit();
+  }
+
+  goNextPage(page, breadcrumb, exp = {}) {
     const { breadcrumbs, pages: { stack }} = this.state;
 
     stack.push(page);
@@ -135,7 +339,8 @@ class Setup extends React.Component {
 
     this.setState({
       pages: { stack, current },
-      showPreviousButton: true
+      showPreviousButton: true,
+      ...exp
     });
   }
 
@@ -158,70 +363,328 @@ class Setup extends React.Component {
     }
   }
 
+  applyConfigFilePassword() {
+    const { configFile, configFilePassword: secret } = this.state;
+
+    if(!secret) {
+      this.setState({ configFilePasswordError: true });
+      return false;
+    }
+
+
+
+    const {
+      ok, data, internal, error
+    } = loadDBConfigFile(configFile, { secret });
+
+    // console.log('applyConfigFilePassword', ok, data, internal, error);
+
+    if(ok) {
+      this.applyConfigFileData(data);
+      return true;
+    }
+
+    if(internal) {
+      MsgBox.show(translateInternal(internal), 'current');
+    } else if(error) {
+      MsgBox.show({
+        type: 'error',
+        message: Strings.messages.LoadingFileError,
+        detail: error.toString()
+      }, 'current');
+    }
+
+    return false;
+  }
+
+  applyConfigFileData(data) {
+    const { db } = data || {};
+    const {
+      client: dbType = '',
+      host: dbHost = '',
+      port: dbPort = '',
+      user: dbUser = '',
+      password: dbPassword = '',
+      database: dbDatabase = ''
+    } = db || {};
+
+    this.setState({
+      dbType,
+      dbHost,
+      dbPort,
+      dbUser,
+      dbPassword,
+      dbDatabase
+    })
+  }
+
+  canTestConnection() {
+    const { mode, dbType } = this.state;
+
+    if(isDBTypeSQLite(dbType)) {
+      const { dbFile } = this.state;
+      return !!dbFile && (mode === 'new' || fs.existsSync(dbFile));
+    }
+
+    if(isDBTypeSupported(dbType)) {
+      const { dbHost, dbUser, dbDatabase } = this.state;
+      return !!dbHost && !!dbUser && !!dbDatabase;
+    }
+  }
+
+  testConnection() {
+    // const translated = translateInternal({ code: Errors.DB.CantConnect, database: 'testing' });
+    // console.log('translated', translated);
+    // MsgBox.show(translateInternal({ code: Errors.DB.CantConnect, database: 'testing' }));
+    // return;
+
+
+    const { mode, dbType: client } = this.state;
+    const isNew = mode === 'new';
+    let config;
+
+    if(isDBTypeSQLite(client)) {
+      const { dbFile: filename } = this.state;
+      const connection = { filename }
+      config = { client, connection }
+
+      if(isNew && fs.existsSync(filename)) {
+        const result = MsgBox.show({
+          type: 'question',
+          buttons: MsgBox.Button.YesCancel,
+          message: Strings.expand(Strins.messages.NewDBFileExists)
+        });
+
+        if(result === 1) { // No
+          return;
+        }
+
+        try {
+          fs.unlinkSync(filename);
+        } catch(error) {
+          return MsgBox.show({
+            type: 'error',
+            message: Strings.expand(Strings.messages.CouldNotDeleteThisFile, { file: filename })
+          });
+        }
+      }
+    } else {
+      const {
+        dbHost: host, 
+        dbPort: port, 
+        dbUser: user, 
+        dbPassword: password, 
+        dbDatabase: database
+      } = this.state;
+      const connection = { host, port, user, password, database }
+      config = { client, connection }
+    }
+
+    this.setState({ loading: true, testingConnection: true });
+
+    if(config) {
+      setupDBData({ mode, config })
+      .then(({ ok, ...rest }) => {
+        if(ok) {
+          this.goNextPage('Finished', Strings.titles.Completed, { finished: true });
+        } else {
+          throw rest;
+        }
+      })
+      .catch(err => {
+        const { internal, error = err } = err || {};
+        let msgbox;
+
+        if(internal) {
+          msgbox = translateInternal(internal);
+        } else if(error) {
+          msgbox = {
+            type: 'error',
+            message: Strings.messages.DBProblem,
+            detail: error.toString()
+          }
+        }
+
+        if(msgbox) {
+          MsgBox.show(msgbox, 'current');
+        }
+      })
+      .finally(() => {
+        this.setState({ loading: false, testingConnection: false });
+      });
+    }
+  }
+
   renderHeader() {
     const { classes } = this.props;
-    const { msg, breadcrumbs } = this.state;
+    const { loading, msg, breadcrumbs } = this.state;
     const { title, type, message } = msg || {};
 
+    console.log('renderHeader', loading);
+
     return (
-      <header className={classes.header}>
-        <img src={require('@assets/Logo_square_XS.png').default} className={classes.logo}/>
-        <div>
-          <Typography classes={{ root: classes.title }} variant="h4" component="span" display="inline">
-            {Strings.titles.Installation}
-          </Typography>
-          {breadcrumbs.length > 0 && (
-            <Breadcrumbs separator={<NavigateNextIcon fontSize="inherit"/>}>
-              {breadcrumbs.filter(v => v).map((text, i) => (
-                <Typography key={`bci-${i}`} variant="body2" color="textPrimary">{text}</Typography>
-              ))}
-            </Breadcrumbs>
-          )}
-        </div>
-        {msg && <MessageOverlay type={type} title={title} message={message}/>}
-        {/* <MessageOverlay 
-          type={'warning'}
-          title="Testing this message 👌" 
-          message={`But that doesn't really explain the pros and cons of each. I am looking for an explanation, and possibly a simple example (use case) highlighting those similarities / differences.\nWhy would one use one over the other? (3)`}
-        /> */}
-      </header>
+      <>
+        <header className={classes.header}>
+          <div className={classes.headerRow}>
+            <img src={require('@assets/Logo_square_XS.png').default} className={classes.logo}/>
+            <div>
+              <Typography classes={{ root: classes.title }} variant="h4" component="span" display="inline">
+                {Strings.titles.Installation}
+              </Typography>
+              {breadcrumbs.length > 0 && (
+                <Breadcrumbs separator={<NavigateNextIcon fontSize="inherit"/>}>
+                  {breadcrumbs.filter(v => v).map((text, i) => (
+                    <Typography key={`bci-${i}`} variant="body2" color="textPrimary">{text}</Typography>
+                  ))}
+                </Breadcrumbs>
+              )}
+            </div>
+            {msg && <MessageOverlay type={type} title={title} message={message}/>}
+            {/* <MessageOverlay 
+              type={'warning'}
+              title="Testing this message 👌" 
+              message={`But that doesn't really explain the pros and cons of each. I am looking for an explanation, and possibly a simple example (use case) highlighting those similarities / differences.\nWhy would one use one over the other? (3)`}
+            /> */}
+          </div>
+          {loading && <LinearProgress color="secondary" />}
+        </header>
+      </>
     );
   }
 
-  renderFooter() {
+  renderFooter(page) {
     const { classes } = this.props;
     const {
+      loading,
       nextButtonText,
       previousButtonText,
+      showNewInstallationButton: showNew,
       showNextButton,
-      showPreviousButton
+      showPreviousButton: showPrev
     } = this.state;
+    let onPrevious = this.goPreviousPage,
+        onNext = this.goNextPage,
+        showNext = showNextButton, 
+        nextText = nextButtonText, 
+        disableNext;
 
-    return (showPreviousButton || showNextButton) && (
+    if(page === 'Finished') return;
+    
+    if(page === 'DBConnectionTools') {
+      showNext = true;
+      disableNext = !this.canTestConnection();
+      onNext = this.testConnection;
+    }
+
+    return (showNew || showPrev || showNext) && (
       <footer className={classes.footer}>
-        {showPreviousButton && (
-          <Button onClick={this.goPreviousPage} startIcon={<NavigateBeforeIcon/>}>
-            {previousButtonText}
-          </Button>
-        )}
-        {showNextButton && (
-          <Button variant="contained" onClick={this.goNextPage} color="primary">
-            {nextButtonText}
-          </Button>
-        )}
+        <div className={classes.footerAddonButtons}>
+          {showNew && (
+            <Button onClick={onPrevious} variant="contained" color="primary" disabled={loading}>
+              {normalizeGreek(Strings.titles.NewInstallation)}
+            </Button>
+          )}
+        </div>
+        <div>
+          {showPrev && (
+            <Button onClick={onPrevious} disabled={loading} startIcon={<NavigateBeforeIcon/>}>
+              {previousButtonText}
+            </Button>
+          )}
+          {showNext && (
+            <Button onClick={onNext} variant="contained" disabled={loading || disableNext} color="primary">
+              {nextText}
+            </Button>
+          )}
+        </div>
       </footer>
     );
   }
 
-  renderContent() {
-    const { pages: { stack, current }} = this.state;
-    const page = current !== undefined && stack[current];
-
+  renderContent(page) {
     switch(page) {
       case 'SelectInstallation': return this.renderPage_SelectInstallation();
-      case 'SelectMode': return this.renderPage_SelectMode();
+      case 'SelectNewType': return this.renderPage_SelectNewType();
       case 'SelectLocalOrConnectTo': return this.renderPage_SelectLocalOrConnectTo();
       case 'DBConnectionTools': return this.renderPage_DBConnectionTools();
+      case 'Finished': return this.renderPage_Finished();
+    }
+  }
+
+  renderDBType(dbType) {
+    const { classes } = this.props;
+
+    if(isDBTypeSQLite(dbType)) {
+      const { loading, mode, sqliteError, dbFile } = this.state;
+
+      return (
+        <div className={classes.inputRow}>
+          <InputFile className={classes.inputFullWidth}
+            label={Strings.titles.DBFile}
+            value={dbFile}
+            error={!!sqliteError}
+            disabled={loading}
+            helperText={sqliteError}
+            onFileSelect={this.handleSQLiteSelectFile}
+            onChange={this.handleSQLiteSelectFile}
+            inputProps={{
+              readOnly: true
+            }}
+            dialog={{
+              title: Strings.titles.DBFile,
+              defaultPath: dbFile || process.app.dataPath,
+              filters: fileDialogFilters(['sqlite', 'all']),
+              showSave: mode === 'new'
+            }}
+          />
+        </div>
+      );
+    }
+
+    if(isDBTypeSupported(dbType)) {
+      const { loading, configFile, dbHost, dbPort, dbUser, dbPassword, dbDatabase } = this.state;
+      const disabled = loading || !!configFile;
+
+      return (
+        <>
+          <div className={classes.inputRow}>
+            <TextField className={clsx(classes.inputFull, classes.inputInline)}
+              label={Strings.titles.ServerAddress} 
+              value={dbHost}
+              disabled={disabled}
+              onChange={this.handleHostChange}
+            />
+            <TextField className={classes.dbConnectionTools_inputPort}
+              label={Strings.titles.Port}
+              value={dbPort}
+              disabled={disabled}
+              onChange={this.handlePortChange}
+            />
+          </div>
+          <div className={classes.inputRow}>
+            <TextField className={clsx(classes.inputFull, classes.inputInline)}
+              label={Strings.titles.User} 
+              value={dbUser}
+              disabled={disabled}
+              onChange={this.handleUserChange}
+            />
+            <InputPassword label={Strings.titles.Password}
+              value={dbPassword} 
+              //showPassword={disabled ? true : null}
+              disabled={disabled}
+              onChange={this.handlePasswordChange}
+            />
+          </div>
+          <div className={classes.inputRow}>
+            <TextField className={classes.dbConnectionTools_inputDBType}
+              label={Strings.titles.Database} 
+              value={dbDatabase}
+              disabled={disabled}
+              onChange={this.handleDatabaseChange}
+            />
+          </div>
+        </>
+      );
     }
   }
 
@@ -230,13 +693,16 @@ class Setup extends React.Component {
     const dbTypes = [...bm.specs.db.supported, null, 'config'];
     const dbTypeTexts = {...Texts.DB.Types, config: Strings.titles.FromConfigFile};
     const {
+      loading,
+      testingConnection,
       showConfigFilePasswordPrompt,
       configFile,
-      dbType,
-      dbPort
+      configFilePasswordError,
+      dbType
     } = this.state;
 
-    console.log('renderPage_DBConnectionTools', typeof(dbType), `'${dbType}'`);
+    // console.log('renderPage_DBConnectionTools', typeof(dbType), `'${dbType}'`);
+    // console.log('configFilePasswordError', configFilePasswordError);
 
     return (
       <div className={classes.dbConnectionTools}>
@@ -249,66 +715,37 @@ class Setup extends React.Component {
               values={dbTypes}
               texts={dbTypeTexts}
               helperText={configFile}
+              disabled={loading}
               onChange={this.handleDBTypeChange}
             />
             {!!configFile && (
-              <IconButton onClick={() => {}}>
+              <IconButton onClick={this.handleUnloadConfigFile}>
                 <FileUndoIcon/>
               </IconButton>
             )}
-            {/* <InputFile label={"Select file"}
-              className={clsx(classes.inputRow, classes.inputFullWidth)}
-              onFileSelect={file => console.log('got file', file)}
-              dialog={{
-                title: 'Select file dialog',
-                defaultPath: 'C:\\Dev',
-                buttonLabel: 'Btn label!!',
-                filters: [{
-                  name: 'All Files', extensions: ['*']
-                }],
-                showSave: true
-              }}
-            /> */}
           </div>
-
-          <div className={classes.inputRow}>
-            <TextField label={Strings.titles.ServerAddress} 
-              className={clsx(classes.inputFull, classes.inputInline)}
-            />
-            <TextField label={Strings.titles.Port}
-              value={dbPort}
-              className={classes.dbConnectionTools_inputPort}
-              onChange={this.handlePortChange}
-            />
-          </div>
-          <div className={classes.inputRow}>
-            <TextField label={Strings.titles.User} className={classes.inputInline}/>
-            <InputPassword disabled label={Strings.titles.Password}/>
-          </div>
+          {this.renderDBType(dbType)}
         </div>
-        <div className={classes.dbConnectionTools_connectionFunctions}>
-
-        </div>
-        <InputDialog
-          fullWidth
-          maxWidth="xs"
+        {/* <div className={classes.dbConnectionTools_connectionFunctions}>
+          <LoadingButton variant="outlined" size="small" 
+            startIcon={<DatabaseCheckIcon/>}
+            disabled={!this.canTestConnection()}
+            loading={loading}
+            loadingIconSize={18}
+            onClick={() => this.setState(({ loading }) => ({ loading: !loading }))}
+          >{normalizeGreek(Strings.titles.TestConnection)}</LoadingButton>
+        </div> */}
+        <InputDialog fullWidth maxWidth="xs"
           title={Strings.titles.ConfigurationFilePassword}
           message={Strings.messages.InputPasswordForProtectedConfigFile}
           open={showConfigFilePasswordPrompt}
-          onConfirm={() => {
-            console.log('dialog configm');
-            this.setState({ showConfigFilePasswordPrompt: false });
-          }}
-          onCancel={() => {
-            console.log('dialog cancel');
-            this.setState({ showConfigFilePasswordPrompt: false, dbType: '' });
-          }}
-          onValidate={async () => {
-            console.log('dialog validate');
-            return true;
-          }}
+          onConfirm={this.handleConfigPasswordConfirm}
+          onCancel={this.handleConfigPasswordClose}
+          onValidate={this.applyConfigFilePassword}
         >
-          <InputPassword label={Strings.titles.Password}/>
+          <InputPassword label={Strings.titles.Password}
+            error={configFilePasswordError}
+            onChange={this.handleConfigPasswordChange}/>
         </InputDialog>
       </div>
     );
@@ -327,12 +764,12 @@ class Setup extends React.Component {
     return (
       <div className={selectInstallation}>
         <LongButton title={Strings.titles.NewInstallation}
-          onClick={this.goNextPage.bind(this, 'SelectMode', Strings.titles.NewInstallation)}
+          onClick={this.handleSelectInstallation.bind(this, 'new')}
           icon={NewInstallationIcon}
           classes={classes}
         />
         <LongButton title={Strings.titles.ConnectToExistingDB}
-          onClick={this.goNextPage.bind(this, 'DBConnectionTools', null)}
+          onClick={this.handleSelectInstallation.bind(this, 'existing')}
           icon={DatabaseToolsIcon}
           classes={classes}
         />
@@ -340,27 +777,27 @@ class Setup extends React.Component {
     );
   }
 
-  renderPage_SelectMode() {
+  renderPage_SelectNewType() {
     const { classes } = this.props;
-    const modes = ['Personal', 'Business'];
+    const newTypes = ['Personal', 'Business'];
 
     return (
-      <div className={classes.selectMode}>
-        {modes.map(mode => (
-          <LongButton key={`select-mode-${mode}`} 
-            onClick={this.goNextPage.bind(this, 'SelectLocalOrConnectTo', mode)}
-            title={mode}
+      <div className={classes.selectNewType}>
+        {newTypes.map(type => (
+          <LongButton key={`select-type-${type}`} 
+            onClick={this.handleSelectNewType.bind(this, type)}
+            title={type}
             classes={{
-              root: classes.selectMode_longButtonRoot,
-              header: classes.selectMode_longButtonHeader,
-              content: classes.selectMode_longButtonContent,
+              root: classes.selectNewType_longButtonRoot,
+              header: classes.selectNewType_longButtonHeader,
+              content: classes.selectNewType_longButtonContent,
               button: classes.longButton
             }}
           >
-            <div className={classes.selectMode_description}>{Strings.content.ApplicationFunctions[mode].Description}</div>
-            <ul className={classes.selectMode_items}>
-              {Strings.content.ApplicationFunctions[mode].Items.map((item, index) => (
-                <li key={`select-mode-${mode}-item-${index}`}>{item}</li>
+            <div className={classes.selectNewType_description}>{Strings.content.ApplicationFunctions[type].Description}</div>
+            <ul className={classes.selectNewType_items}>
+              {Strings.content.ApplicationFunctions[type].Items.map((item, index) => (
+                <li key={`select-mode-${type}-item-${index}`}>{item}</li>
               ))}
             </ul>
           </LongButton>
@@ -383,7 +820,7 @@ class Setup extends React.Component {
       <div className={selectInstallation}>
         <LongButton title={Strings.titles.LocalDBInstallation}
           subtitle={`${Strings.content.DBInstallationType.Local.Description} (${Strings.titles.Suggested.toLowerCase()})`}
-          onClick={this.goNextPage.bind(this, 'SelectMode', Strings.titles.LocalInstallation)}
+          onClick={this.goNextPage.bind(this, 'selectNewType', Strings.titles.LocalInstallation)}
           icon={HomeImportOutlineIcon}
           classes={classes}
         />
@@ -397,16 +834,40 @@ class Setup extends React.Component {
     );
   }
 
+  renderPage_Finished() {
+    const { classes } = this.props;
+    const { mode } = this.state;
+    const isNew = mode === 'new';
+
+    return (
+      <div className={classes.finished}>
+        <FinishedSuccessIcon className={classes.finished_icon}/>
+        <Typography classes={{ root: classes.finished_title }} variant="h4" component="p">
+          {Strings.messages.InstallationComplete}
+        </Typography>
+        <Typography classes={{ root: classes.finished_title }} variant="h5" component="p">
+          {Strings.messages.AppNeedsReload}
+        </Typography>
+        <Button onClick={this.handleReload} 
+          variant="contained" color="primary" size="large"
+          className={classes.finished_button}
+        >{normalizeGreek(Strings.titles.Reload)}</Button>
+      </div>
+    );
+  }
+
   render() {
     const { classes } = this.props;
+    const { pages: { stack, current }} = this.state;
+    const page = current !== undefined && stack[current];
 
     return (
       <React.Fragment>
         <CssBaseline/>
         <div className={classes.container}>
-          {this.renderHeader()}
-          <section className={classes.section}>{this.renderContent()}</section>
-          {this.renderFooter()}
+          {this.renderHeader(page)}
+          <section className={classes.section}>{this.renderContent(page)}</section>
+          {this.renderFooter(page)}
         </div>
       </React.Fragment>
     );
@@ -422,12 +883,20 @@ const styles = theme => ({
     overflow: 'visible'
   },
   header: {
+    // display: 'flex',
+    // position: 'relative',
+    // flexDirection: 'row',
+    // alignItems: 'center',
+    // userSelect: 'none'
+  },
+  headerRow: {
     display: 'flex',
     position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     userSelect: 'none'
   },
+
   title: {
     color: '#000000ab'
   },
@@ -443,12 +912,15 @@ const styles = theme => ({
   },
   footer: {
     display: 'flex',
-    justifyContent: 'flex-end',
+    // justifyContent: 'flex-end',
     flexDirection: 'row',
     padding: theme.spacing(1),
     '& > button': {
       marginLeft: theme.spacing(1)
     }
+  },
+  footerAddonButtons: {
+    flex: 1
   },
 
   longButton: {
@@ -505,24 +977,24 @@ const styles = theme => ({
     marginRight: theme.spacing(2)
   },
 
-  selectMode: {
+  selectNewType: {
     display: 'flex',
     justifyContent: 'space-evenly'
   },
-  selectMode_longButtonRoot: {
+  selectNewType_longButtonRoot: {
     width: '44%',
     margin: theme.spacing(3, 0)
   },
-  selectMode_longButtonHeader: {
+  selectNewType_longButtonHeader: {
     marginBottom: theme.spacing(2)
   },
-  selectMode_longButtonContent: {
+  selectNewType_longButtonContent: {
     textAlign: 'left'
   },
-  selectMode_description: {
+  selectNewType_description: {
     fontSize: '.9rem'
   },
-  selectMode_items: {
+  selectNewType_items: {
     fontSize: '.9rem',
     paddingLeft: theme.spacing(4)
   },
@@ -539,9 +1011,9 @@ const styles = theme => ({
   },
   dbConnectionTools_connectionFunctions: {
     display: 'flex',
-    width: '34%',
+    width: '35%',
     flexDirection: 'column',
-    padding: theme.spacing(3),
+    padding: theme.spacing(2),
     borderLeft: '1px solid lightgray'
   },
   dbConnectionTools_inputDBType: {
@@ -557,6 +1029,28 @@ const styles = theme => ({
   },
   dbConnectionTools_inputPort: {
     width: 100
+  },
+
+  // Finished
+  finished: {
+    flex: 1,
+    flexDirection: 'column',
+    display: 'flex',
+    // justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    padding: theme.spacing(2),
+  },
+  finished_icon: {
+    fontSize: 120,
+    color: '#5bc35b',
+    filter: 'drop-shadow(2px 8px 13px rgba(0,0,0,.3))'
+  },
+  finished_title: {
+    lineHeight: 2
+  },
+  finished_button: {
+    marginTop: 20
   }
 });
 

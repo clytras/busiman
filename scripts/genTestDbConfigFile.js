@@ -11,6 +11,7 @@ const configs = [{
   file: 'local-mysql.bmc',
   data: {
     db: {
+      client: 'mysql',
       host: 'localhost',
       port: 3306,
       user: 'root',
@@ -22,6 +23,7 @@ const configs = [{
   file: 'local-mssql.bmc',
   data: {
     db: {
+      client: 'mssql',
       host: 'ZKRHC',
       user: 'sa',
       password: 'root',

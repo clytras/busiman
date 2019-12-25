@@ -7,6 +7,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Strings } from '@i18n';
+import util from 'util';
 
 
 export default function({
@@ -28,9 +29,10 @@ export default function({
   function handleConfirm() {
     if(onConfirm) {
       if(onValidate) {
-        if(onValidate instanceof Promise) {
+        if(onValidate instanceof Promise || util.types.isAsyncFunction(onValidate)) {
           onValidate().then(valid => valid && onConfirm()).catch(() => {});
         } else if(typeof(onValidate) === 'function') {
+          console.log('onValidate is function');
           if(onValidate()) {
             onConfirm();
           }

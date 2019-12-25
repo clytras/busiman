@@ -3,29 +3,12 @@ import fse from 'fs-extra';
 import path from 'path';
 import { app } from 'electron';
 import { success, fail, Errors } from '@utils/errors';
+import { decryptDBProperties } from '@utils/config';
 import { DB } from '@db';
 import { Config } from '@db/models/Config';
 
 
 export async function initApp() {
-  const result = {
-    ok: false
-  }
-
-  // // Create userData directory
-  // if(!fs.existsSync(app.getPath('userData'))) {
-  //   try {
-  //     fs.mkdirSync(app.getPath('userData'), )
-  //   } catch(error) {
-  //     if(error.code !== 'EEXIST') {
-  //       return { ok: false, error }
-  //     }
-  //   }
-  // }
-
-  // console.log('process.app.dataPath', process.app.dataPath);
-  // console.log('process.app', process.app);
-
   try {
     fs.mkdirSync(process.app.dataPath, { recursive: true });
   } catch(error) {
@@ -53,7 +36,7 @@ export async function initApp() {
     },
     useNullAsDefault: true,
     migrations: {
-      tableName: process.app.db.migrationsName,
+      tableName: process.app.db.migrationsTableName,
       directory: path.resolve(process.app.db.migrationsPath, 'app')
     }
   });
@@ -66,14 +49,17 @@ export async function initApp() {
 
     console.log('migrate done?');
 
-    process.app.config = Config.bindKnex(process.app.db.app);
-    process.app.db.dataConnection = await process.app.config.get('data.connection');
+    process.app.config = Config.bindKnex(process.app.db.app.db);
 
-    if(!process.app.db.dataConnection) {
+    const dataConnection = await process.app.config.get('db.data.connection');
+
+    if(!dataConnection) {
       return fail.internal({
         code: Errors.DB.NotInitialized
       });
     }
+
+    process.app.db.dataConnection = decryptDBProperties(dataConnection);
 
     if(!DB.validConfig(process.app.db.dataConnection, { mustHaveDatabase: true })) {
       return fail.internal({

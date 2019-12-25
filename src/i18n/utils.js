@@ -1,5 +1,20 @@
+import Aliases from 'obj-aliases';
 
-function protoFormatPlural(fmt, data) {
+
+export function protoExpand(fmt, params) {
+  const langAliases = new Aliases(this);
+  const paramsAliases = new Aliases(params);
+
+  return fmt.replace(/\{(.*?)\}/gi, (result, aliasKeyPath) => {
+    if(paramsAliases.has(aliasKeyPath)) {
+      return paramsAliases.get(aliasKeyPath, { expandString: true });
+    }
+
+    return langAliases.get(aliasKeyPath, result, { expandString: true });
+  });
+}
+
+export function protoFormatPlural(fmt, data) {
   let pluralData = {};
   for(let key in data) {
     let value = data[key];
@@ -13,19 +28,19 @@ function protoFormatPlural(fmt, data) {
   return this.formatString(fmt, pluralData);
 }
 
-function protoSelectString(fromObject) {
+export function protoSelectString(fromObject) {
   const locale = this.getSafeCurrentLocale();
   return fromObject && fromObject.hasOwnProperty(locale) ? fromObject[locale] : fromObject;
 }
 
-function protoGetSafeCurrentLocale(defaultLocale = 'en') {
+export function protoGetSafeCurrentLocale(defaultLocale = 'en') {
   const languages = this.getAvailableLanguages();
   let locale = this.getLanguage().toLowerCase();
   if(languages.indexOf(locale) == -1) locale = defaultLocale;
   return locale;
 }
 
-function protoSetSafeLanguage(language, defaultLocale = 'en') {
+export function protoSetSafeLanguage(language, defaultLocale = 'en') {
   const languages = this.getAvailableLanguages();
   if(languages.indexOf(language) >= 0) {
     console.log('SETTING LANG', language);
@@ -35,12 +50,12 @@ function protoSetSafeLanguage(language, defaultLocale = 'en') {
   }
 }
 
-function protoHasLocale(locale) {
+export function protoHasLocale(locale) {
   const languages = this.getAvailableLanguages();
   return languages.indexOf(locale) >= 0;
 }
 
-function protoGetInterfaceLocale() {
+export function protoGetInterfaceLocale() {
   const interfaceLanguage = this.getInterfaceLanguage();
   const localeSplit = interfaceLanguage.split('-');
   if(localeSplit.length == 2) {
@@ -57,7 +72,7 @@ function protoGetInterfaceLocale() {
   };
 }
 
-function protoAutoSetLanguage(language = 'auto') {
+export function protoAutoSetLanguage(language = 'auto') {
   const interfaceLocale = this.getInterfaceLocale();
   const setLanguage = language == 'auto' ? interfaceLocale.language : language;
   this.setSafeLanguage(setLanguage);
@@ -69,21 +84,10 @@ function protoAutoSetLanguage(language = 'auto') {
   }
 }
 
-function getLanguageFromLocale(locale) {
+export function getLanguageFromLocale(locale) {
   const localeSplit = locale.split('-');
   if(localeSplit.length >= 1) {
     return localeSplit[0];
   }
   return locale;
-}
-
-export {
-  protoFormatPlural,
-  protoSelectString,
-  protoGetSafeCurrentLocale,
-  protoSetSafeLanguage,
-  protoHasLocale,
-  protoGetInterfaceLocale,
-  protoAutoSetLanguage,
-  getLanguageFromLocale
 }

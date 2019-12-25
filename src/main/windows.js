@@ -211,8 +211,8 @@ export class SetupWindow extends Window {
     super({
       icon: selectAppIcon(),
       // title: appTitle(Strings.titles.Installation),
-      height: 480,
-      width: 640,
+      height: 520,
+      width: 680,
       maximizable: false,
       resizable: false,
       show: false,

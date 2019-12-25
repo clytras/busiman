@@ -1,5 +1,3 @@
-
-
 import '../global';
 import { app, systemPreferences, ipcMain as ipc } from 'electron';
 //import { enableLiveReload } from 'electron-compile';
@@ -11,6 +9,8 @@ import { initApp } from './init';
 import { InitWindow, SetupWindow, MainWindow } from './windows';
 import { MsgBox } from '@utils/dialog';
 import { Errors, translateInternal } from '@utils/errors';
+import './ipc/db';
+import './ipc/db/setup';
 import { Strings } from '@i18n';
 
 // import { hasConfigDb } from '../db';
@@ -106,14 +106,14 @@ if (!gotTheLock) {
     } else if(internal) {
       console.log('got internal', internal);
 
-      const translation = translateInternal(internal);
+      const translated = translateInternal(internal);
       const { code } = internal;
 
       if([
         Errors.DB.InvalidConfig,
         Errors.DB.CantConnect
       ].indexOf(code) !== -1) {
-        MsgBox.show(translation);
+        MsgBox.show(translated);
       }
 
       // if(code === Errors.DB.InvalidConfig) {
@@ -128,7 +128,12 @@ if (!gotTheLock) {
       //   });
       // }
 
-      createSetupWindow({ appInit: { internal: { code, translation }}});
+      createSetupWindow({
+        appInit: {
+          internal: { code, translated },
+          connection: process.app.db.dataConnection
+        }
+      });
     } else if(error) {
       MsgBox.show({
         type: 'error',
@@ -155,7 +160,7 @@ if (!gotTheLock) {
     //   window.setMenu(null);
     // });
 
-    // process.app.system.hasGPU = await hasGPUEnabled();
+    Strings.setSafeLanguage(app.getLocale());
 
     // add delay for init window to have transparency for linux machines
     setTimeout(() => {

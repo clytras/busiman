@@ -1,5 +1,7 @@
-import { dialog } from 'electron';
+import { dialog, remote } from 'electron';
 import { Strings } from '@i18n';
+
+const isRenderer = require('is-electron-renderer');
 
 const OK = 'OK';
 const Cancel = 'Cancel';
@@ -36,7 +38,17 @@ export class MsgBox {
     defaultId,
     cancelId 
   }, window) {
-    return dialog.showMessageBoxSync(window, {
+
+    let browserWindow;
+
+    if(isRenderer && window === 'current') {
+      const { getCurrentWindow } = remote;
+      browserWindow = getCurrentWindow();
+    } else {
+      browserWindow = window;
+    }
+
+    return (isRenderer ? remote.dialog : dialog).showMessageBoxSync(browserWindow, {
       type,
       buttons,
       title,
@@ -61,6 +73,9 @@ export function fileDialogFilters(filters = ['all']) {
     switch(filter) {
       case 'all':
         extensions = ['*'];
+        break;
+      case 'sqlite':
+        extensions = ['sqlite', 'db', 'sqlite3', 'db3'];
         break;
       default:
         extensions = [filter];

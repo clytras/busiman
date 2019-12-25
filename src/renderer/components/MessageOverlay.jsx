@@ -60,19 +60,19 @@ export default function({
 
 const colors = {
   info: {
-    backgroundColor: 'hsla(0, 0%, 100%, 0.75)',
+    backgroundColor: 'hsla(0, 0%, 100%, 0.8)',
     borderColor: '#00b8ff'
   },
   success: {
-    backgroundColor: 'hsla(116, 75%, 94%, 0.75)',
+    backgroundColor: 'hsla(116, 75%, 94%, 0.8)',
     borderColor: '#04ff00'
   },
   warning: {
-    backgroundColor: 'hsla(58, 100%, 89%, 0.75)',
+    backgroundColor: 'hsla(58, 100%, 89%, 0.8)',
     borderColor: 'yellow'
   },
   error: {
-    backgroundColor: 'hsla(0, 100%, 89%, 0.75)',
+    backgroundColor: 'hsla(0, 100%, 89%, 0.8)',
     borderColor: 'red'
   }
 }
@@ -157,7 +157,7 @@ const useStyles = makeStyles(theme => ({
 
   header: {
     display: 'flex',
-    flex: 1,
+    // flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between'
   },
@@ -170,12 +170,13 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flex: 1,
     flexDirection: 'column',
-    padding: theme.spacing(1, 0),
+    padding: theme.spacing(1, 1, 1, 0),
   },
   messageTitle: {
 
   },
   messageText: {
+    flex: 1,
     overflow: 'auto',
     whiteSpace: 'pre-line'
   }

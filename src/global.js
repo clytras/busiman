@@ -5,6 +5,7 @@ app.setPath('userData', path.join(app.getPath('appData'), PACKAGE.shortName));
 
 const dataPath = path.join(app.getPath('userData'), 'Data');
 const migrationsName = 'migrations';
+const migrationsTableName = `bm_${migrationsName}`;
 
 process.app = {
   package: PACKAGE,
@@ -17,6 +18,7 @@ process.app = {
     dataDefaultSQLiteFile: path.join(dataPath, `${PACKAGE.name}.data.db`),
     dataDefaultDatabaseName: PACKAGE.name,
     migrationsName,
+    migrationsTableName,
     migrationsPath: path.join(dataPath, migrationsName)
   },
   system: {

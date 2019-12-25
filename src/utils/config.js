@@ -1,3 +1,5 @@
+import fs from 'fs';
+import { success, fail, Errors } from '@utils/errors';
 import Cryptr from 'lyxlib/utils/cryptr';
 import { encryptProperties, decryptProperties } from '@utils/crypt';
 import bm from '@app/globals';
@@ -27,8 +29,12 @@ export function decodeConfigData(data, {
     let { version, _ } = data;
 
     if(secret) {
-      const cryptr = new Cryptr(secret);
-      _ = JSON.parse(cryptr.decrypt(_));
+      try {
+        const cryptr = new Cryptr(secret);
+        _ = JSON.parse(cryptr.decrypt(_));
+      } catch(error) {
+        return undefined;
+      }
     }
 
     if(typeof(_) === 'object') {
@@ -68,11 +74,19 @@ export function isValidConfigData(data) {
 
 const DBConfigEncryptedProps = ['password', 'user', 'database', 'host', 'port'];
 
+export function encryptDBProperties(data) {
+  return encryptProperties(data, DBConfigEncryptedProps);
+}
+
+export function decryptDBProperties(data) {
+  return decryptProperties(data, DBConfigEncryptedProps);
+}
+
 export function encodeDBConfig(data, {
   secret
 } = {}) {
   return encodeConfigData(
-    encryptProperties(data, DBConfigEncryptedProps),
+    encryptDBProperties(data),
     {
       secret,
       sig: bm.specs.bmcDBSignature
@@ -84,8 +98,67 @@ export function decodeDBConfig(data, {
   secret,
   validate = true
 } = {}) {
-  return decryptProperties(
-    decodeConfigData(data, { secret, validate, validateSig: bm.specs.bmcDBSignature }),
-    DBConfigEncryptedProps
-  );
+  const validateSig = bm.specs.bmcDBSignature;
+  const decoded = decodeConfigData(data, { secret, validate, validateSig });
+
+  if(decoded) {
+    return decryptDBProperties(decoded);
+  }
+}
+
+export function loadDBConfigFile(file, { secret } = {}) {
+  if(!fs.existsSync(file)) {
+    return fail.internal({ code: Errors.Config.FileDoesNotExists });
+  }
+
+  let contents;
+
+  try {
+    contents = fs.readFileSync(file);
+  } catch(error) {
+    return fail({ error });
+  }
+
+  try {
+    const json = JSON.parse(contents);
+    const { valid, encrypted } = isValidConfigData(json);
+
+    if(valid) {
+      let decoded;
+      if(secret) {
+        // console.log('loadDBConfigFile', secret, json);
+        decoded = decodeDBConfig(json, { secret });
+      } else if(!encrypted) {
+        decoded = decodeDBConfig(json);
+      } else {
+        return success({ data: json, encrypted });
+      }
+
+      if(decoded) {
+        const { data } = decoded;
+
+        if(data && 'db' in data) {
+          return success({ data });
+        }
+      }
+
+      if(secret) {
+        return fail.internal({ code: Errors.Config.InvalidPassword });
+      } else {
+        return fail.internal({ code: Errors.Config.InvalidFormat });
+      }
+
+        
+      // } else {
+      //   const { _ } = json;
+      //   const { data } = _;
+      //   return success({ data, encrypted });
+      // }
+    }
+
+    return fail.internal({ code: Errors.Config.InvalidFormat });
+  } catch(error) {
+    console.log('error', JSON.stringify(error), error, error.code, error.message);
+    return fail.internal({ code: Errors.Config.InvalidFormat }, { error });
+  }
 }

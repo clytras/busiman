@@ -17,6 +17,7 @@ export default function({
   helperText,
   value: passedValue = '',
   showPassword: passedShowPassword = false,
+  hideIfDisabled = true,
   disabled = false,
   error = false,
   onChange,
@@ -27,7 +28,11 @@ export default function({
   const [internalId] = useState(nanoid());
 
   useEffect(() => setValue(passedValue), [passedValue]);
-  useEffect(() => setShowPassword(passedShowPassword), [passedShowPassword]);
+  useEffect(() => {
+    if(passedShowPassword !== null) {
+      setShowPassword(passedShowPassword);
+    }
+  }, [passedShowPassword]);
 
   function handleChange({ target: { value }}) {
     setValue(value);
@@ -47,14 +52,16 @@ export default function({
   !id && (id = `input-password-${internalId}`);
   !name && (name = id);
 
+  const passwordVisibility = showPassword && !(disabled && hideIfDisabled);
+
   return (
     <FormControl className={className} error={error}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
       <Input
         id={id}
         name={name}
-        type={showPassword ? 'text' : 'password'}
-        value={value}
+        type={passwordVisibility ? 'text' : 'password'}
+        value={(!passwordVisibility && disabled) ? 'x'.repeat(value.length) : value}
         disabled={disabled}
         onChange={handleChange}
         endAdornment={
@@ -64,7 +71,7 @@ export default function({
               onClick={handleClickShowPassword}
               onMouseDown={handleMouseDownPassword}
             >
-              {showPassword ? <VisibilityIcon fontSize="small"/> : <VisibilityOffIcon fontSize="small"/>}
+              {passwordVisibility ? <VisibilityIcon fontSize="small"/> : <VisibilityOffIcon fontSize="small"/>}
             </IconButton>
           </InputAdornment>
         }
