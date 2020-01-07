@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { setConfig } from 'react-hot-loader'
 
+// https://github.com/gaearon/react-hot-loader/issues/1088#issuecomment-440820031
 setConfig({
   // if our patch is present - ignore all SFC
   ignoreSFC: !!ReactDOM.setHotElementComparator,
@@ -34,5 +35,5 @@ if(document.getElementById('init')) {
     ReactDOM.render(<Themed><Setup {...props}/></Themed>, document.getElementById('setup'));
   })();
 } else if(document.getElementById('app')) {
-  ReactDOM.render(<App/>, document.getElementById('app'));
+  ReactDOM.render(<Themed><App/></Themed>, document.getElementById('app'));
 }

@@ -37,14 +37,15 @@ export default function({
   },
   inputProps
 }) {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState('');
   const [internalId] = useState(nanoid());
 
   useLayoutEffect(() => {
     if(passedValue !== value) {
       setValue(passedValue);
-      onChange && onChange(passedValue);
     }
+
+    onChange && onChange(passedValue);
   }, [passedValue]);
 
   function handleOpenClick() {
@@ -87,6 +88,8 @@ export default function({
 
   !id && (id = `input-file-${internalId}`);
   !name && (name = id);
+
+  console.log('input file render', value);
 
   return (
     <FormControl className={className} error={error}>

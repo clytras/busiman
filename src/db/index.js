@@ -69,45 +69,97 @@ export class DB {
     }
   }
 
-  async listTables() {
+  async hasMigrationTable() {
+    const { ok, error, tables = [] } = await this.listTables();
+    let result = false;
+
+    if(ok) {
+      const { migrations: { tableName } = {}} = this._config;
+
+      if(tableName) {
+        const found = [tableName, `${tableName}_lock`]
+        .reduce((acc, table) => tables.indexOf(table) !== -1 ? ++acc : acc, 0);
+        result = found === 2;
+      }
+    }
+
+    return { result, tables }
+  }
+
+  async listTables({ excludeDefaults = true } = {}) {
     try {
-      let query;
-      let bindings;
+      let rows;
+      let tables = [];
   
       switch(this._config.client) {
-        case 'mssql':
-          query = 'SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\' AND table_catalog = ?',
-          bindings = [ this.db.client.database() ];
+        case 'mssql': {
+          // query = 'SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\' AND table_catalog = ?',
+          // bindings = [ this.db.client.database() ];
+          const result = await this.db
+          .from('information_schema.tables')
+          .select('table_name')
+          .where('table_schema', 'public')
+          .where('table_catalog', this.db.client.database());
+
+          rows = result;
           break;
+        }
         case 'mysql':
-        case 'mysql2':
-          query = 'SELECT table_name FROM information_schema.tables WHERE table_schema = ?';
-          bindings = [ this.db.client.database() ];
+        case 'mysql2': {
+          // const query = 'SELECT table_name FROM information_schema.tables WHERE table_schema = ?';
+          // const bindings = [ this.db.client.database() ];
+          const result = await this.db
+          .from('information_schema.tables')
+          .select('table_name')
+          .where('table_schema', this.db.client.database());
+
+          rows = result;
           break;
-        case 'oracle':
-          query = 'SELECT table_name FROM user_tables';
+        }
+        case 'oracle': {
+          // query = 'SELECT table_name FROM user_tables';
+          const result = await this.db
+          .from('user_tables')
+          .select('table_name');
+
+          rows = result;
           break;
+        }
         case 'pg':
-          query =  'SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema() AND table_catalog = ?';
-          bindings = [ this.db.client.database() ];
+          // query =  'SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema() AND table_catalog = ?';
+          // bindings = [ this.db.client.database() ];
+          // const result = await this.db
+          // .from('information_schema.tables')
+          // .select('table_name')
+          // .where('table_schema', this.db.client.database());
+
+          const result = await this.db
+          .from('pg_catalog.pg_tables')
+          .select('tablename')
+          .where('schemaname', this.db.client.database());
+
+          rows = result;
           break;
         case 'sqlite':
-        case 'sqlite3':
-          query = "SELECT name AS table_name FROM sqlite_master WHERE type='table'";
+        case 'sqlite3': {
+          // query = "SELECT name AS table_name FROM sqlite_master WHERE type='table'";
+          
+          const result = await this.db
+          .from('sqlite_master')
+          .select('name as table_name')
+          .where('type', 'table');
+
+          if(result.length > 0 && excludeDefaults) {
+            rows = result.filter(({ table_name }) => table_name !== 'sqlite_sequence');
+          } else {
+            rows = result;
+          }
           break;
+        }
       }
 
-      const result = await this.db.raw(query, bindings);
-      let tables = [];
-
-      if(result) {
-        let { rows } = result;
-        if(!rows && Array.isArray(result)) {
-          rows = result[0];
-        }
-        if(rows) {
-          tables = rows.map(row => row.table_name);
-        }
+      if(rows && rows.length) {
+         tables = rows.map(({ table_name }) => table_name);
       }
 
       return success({ tables });
@@ -165,7 +217,6 @@ export class DB {
         await db.raw(testQuery);
 
         if(keepConnection) {
-          console.log('keeping connection', this.db);
           if(this.db) {
             try {
               this.db.destroy();
@@ -185,10 +236,6 @@ export class DB {
 
   async create() {
     let db;
-    // let result = {
-    //   ok: false,
-    //   supported: false
-    // }
 
     if(this.db) {
       try {
@@ -197,15 +244,11 @@ export class DB {
       this.db = null;
     }
 
-    // console.log('db.create', this._config);
-
     switch(this._config.client) {
       case 'sqlite3':
       case 'sqlite':
         const { filename } = this._config.connection;
         const location = path.dirname(filename);
-
-        // console.log('db.create:sqlite', this._config, filename, location);
 
         if(!fs.existsSync(location)) {
           fs.mkdirSync(location, { recursive: true, mode: 764 });
@@ -213,16 +256,15 @@ export class DB {
 
         try {
           db = knex(this._config);
+          await db.raw('SELECT 1'); // it has to execute a single query to create the db file
           console.warn('db.create:sqlite:ok?');
           return success({ supported: true });
         } catch(error) {
           console.warn('db.create:sqlite:error', error);
-          // result = { ok: false, supported: true, error }
           return fail({ supported: true, error });
         }
         break;
       case 'oracle':
-        // result = { ok: false, supported: false }
         break; // to fail unsuported
       case 'mysql':
       case 'mysql2':
@@ -234,49 +276,35 @@ export class DB {
               db = knex({ host, user, password, database });
               await db.raw('SELECT 1');
               this.db = db;
-              // result = { ok: true, supported: true }
               return success({ supported: true });
             } catch {
               try {
                 db = knex({ host, user, password });
                 await db.raw(`CREATE DATABASE \`${database}\``);
                 this.db = db;
-                // result = { ok: true, supported: true }
                 return success({ supported: true });
               } catch(error) {
-                // result = { ok: false, supported: true, error }
                 return fail({ supported: true, error });
               }
             }
           } else {
-            //result = { ok: false, supported: true }
             return fail({ supported: true });
           }
         } catch(error) {
-          // result = { ok: false, supported: true, error }
           return fail({ supported: true, error });
         }
         break;
       case 'mssql':
       case 'pg':
-        // result = { ok: false, supported: false }
         break; // to fail unsuported
     }
 
     return fail({ supported: false });
-
-    // return result;
   }
 
   async open() {
     if(await this.exists()) {
       return true;
-      // try {
-      //   const { count } = this.db(process.app.db.migrationsName).count('id').first();
-      //   console.log('count', JSON.stringify(count));
-      // } catch(error) {
-      //   console.warn('cant get migrations count', JSON.stringify(error));
-      // }
     }
     
     return false;

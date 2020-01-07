@@ -41,10 +41,18 @@ export class Config extends Model {
 
   static async set(key, value) {
     try {
+      console.log('set', key, value);
       await this.query().insert({ key, value });
       return true;
-    } catch(error) {
-      return false;
+    } catch(insertError) {
+      // console.log('set error', error, JSON.stringify(error));
+
+      try {
+        await this.query().patch({ key, value });
+        return true;
+      } catch(updateError) {
+        return false;
+      }
     }
   }
 

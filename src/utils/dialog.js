@@ -26,6 +26,10 @@ export class MsgBox {
     RetryCancel: [Retry, Cancel]
   }
 
+  static showSync(options, window) {
+    return this.show(options, window, (isRenderer ? remote.dialog : dialog).showMessageBoxSync);
+  }
+
   static show({
     type,
     buttons = MsgBox.Buttons.OK,
@@ -37,7 +41,7 @@ export class MsgBox {
     icon,
     defaultId,
     cancelId 
-  }, window) {
+  }, window, fn) {
 
     let browserWindow;
 
@@ -48,7 +52,11 @@ export class MsgBox {
       browserWindow = window;
     }
 
-    return (isRenderer ? remote.dialog : dialog).showMessageBoxSync(browserWindow, {
+    if(!fn) {
+      fn = (isRenderer ? remote.dialog : dialog).showMessageBox;
+    }
+
+    return fn(browserWindow, {
       type,
       buttons,
       title,

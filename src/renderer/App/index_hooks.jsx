@@ -1,26 +1,32 @@
-import path from 'path';
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom';
+import path from 'path';
 import { hot } from 'react-hot-loader/root'
-import CssBaseline from '@material-ui/core/CssBaseline';
 import { makeStyles } from '@material-ui/core/styles';
-import { copyStyles } from '../utils/DOM';
+import { copyStyles } from '@utils/DOM';
 import SplitterLayout from 'react-splitter-layout';
 import { Titlebar, Color } from '@lytrax/custom-electron-titlebar';
 import NewWindow from 'react-new-window'
 // import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite/no-important';
 import { Strings } from '@i18n';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import SideNav from './components/SideNav';
+import Header from '@renderer/components/Header';
+import Footer from '@renderer/components/Footer';
+import SideNav from '@renderer/components/SideNav';
 import Button from '@material-ui/core/Button';
+import WindowBase from '@renderer/components/WindowBase';
 
 import * as platform from 'platform';
-import { isDevMode, isDbgMode } from '../utils';
+import { isDevMode, isDbgMode } from '@utils';
 
 const app = require('electron').remote.app
 
+import IconButton from '@material-ui/core/IconButton';
+import HomeImportOutlineIcon from 'mdi-material-ui/HomeImportOutline';
+import DatabaseIcon from 'mdi-material-ui/Database';
+import DatabaseCheckIcon from 'mdi-material-ui/DatabaseCheck';
+import FileUndoIcon from 'mdi-material-ui/FileUndo';
+import FinishedSuccessIcon from 'mdi-material-ui/CheckboxMultipleMarkedCircleOutline';
 
 // import {library} from '@fortawesome/fontawesome-svg-core'
 // import {
@@ -42,12 +48,9 @@ const app = require('electron').remote.app
 //   faHome
 // );
 
-// import 'bootstrap/dist/css/bootstrap.css';
-import '../../assets/fonts/MaterialDesignIcons/material-icons.css';
-// import 'typeface-roboto/index.css';
-import '../../assets/fonts/Roboto/index.css';
+
 import 'react-splitter-layout/lib/index.css';
-import './styles.scss';
+
 
 // const App = () => (
 //     <div>
@@ -62,6 +65,9 @@ import './styles.scss';
 function App() {
   const classes = useStyles();
   const [modalsIndex, setModalsIndex] = useState(0);
+  const [Icon, setIcon] = useState(HomeImportOutlineIcon);
+  const [iconToggle, setIconToggle] = useState(0);
+
 
   useEffect(() => {
     new Titlebar({
@@ -69,9 +75,36 @@ function App() {
       titleHorizontalAlignment: 'left',
       drag: true,
       menuPosition: 'left',
-      icon: require('../../assets/bsm-icon.png').default
+      icon: require('@assets/bsm-icon.png').default
     });
+
+    // let icon = 1;
+    // const timer = setInterval(() => {
+    //   console.log('timer');
+    //   if(icon & 1) {
+    //     setIcon(HomeImportOutlineIcon);
+    //     icon = 0;
+    //   } else {
+    //     setIcon(FileUndoIcon);
+    //     icon = 1;
+    //   }
+    // }, 1000);
+
+    // return () => {
+    //   clearInterval(timer);
+    // }
   }, []);
+
+  function toggleIcon() {
+    console.log('toggleIcon');
+    if(iconToggle & 1) {
+      setIcon(HomeImportOutlineIcon);
+      setIconToggle(0);
+    } else {
+      setIcon(FileUndoIcon);
+      setIconToggle(1);
+    }
+  }
 
   function openPopup() {
     //window.open('https://github.com', '_blank', 'nodeIntegration=no')
@@ -91,8 +124,7 @@ function App() {
   }
 
   return (
-    <React.Fragment>
-      <CssBaseline/>
+    <WindowBase>
       <div className={classes.appContainer}>
         <Header/>
         <div className={classes.contentFrameContainer}>
@@ -103,7 +135,7 @@ function App() {
           >
           <SideNav/>
           <div>
-            <h4>Welcome to React, Electron and JS!!!! {Strings.Home}</h4>
+            <h4>Welcome to React, Electron and JS!! {Strings.Home}</h4>
             <pre>{
             [platform.name,
             platform.version,
@@ -124,6 +156,12 @@ function App() {
             </pre>
           
             <Button variant="contained" color="primary" onClick={openPopup}>{"Open Modal!!"}</Button>
+            <IconButton onClick={() => {}}>
+              <Icon/>
+            </IconButton>
+            <IconButton onClick={toggleIcon}>
+              <FinishedSuccessIcon/>
+            </IconButton>
             {/* <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
             <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
             <ModalBody>
@@ -140,11 +178,11 @@ function App() {
         </div>
         <Footer/>
       </div>
-    </React.Fragment>
+    </WindowBase>
   );
 }
 
-export default hot(App)
+export default hot(App);
 
 
 // class App extends React.Component {

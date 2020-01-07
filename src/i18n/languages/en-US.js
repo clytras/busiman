@@ -58,6 +58,7 @@ export default {
     DBProblem: 'Database problem',
     ConfigProblem: 'Configuration problem',
     IOProblem: 'Files system problem',
+    DBConnectionSuccess: 'Connection to the database is successful',
     DBConnectionNotValid: 'Database connection is not valid',
     DBCantConnect: 'Can\'t connect to the database',
     InputPasswordForProtectedConfigFile: 'Enter the password for the protected configuration file',
@@ -74,18 +75,28 @@ export default {
     InstallationComplete: 'Installation complete',
     AppNeedsReload: 'The application needs to be reloaded',
     CheckDBConnectionInfo: 'Check if you are connected to the database server network or that the database file exists',
+    DBHasNotValidData: 'The database does not contain valid application data',
+    DefaultDBFileExists: 'There seems to be a database file on the local installation',
+    CautionAllDataWillBeDeleted: 'CAUTION: All data that the database file may contain will be deleted',
+    CouldNotCreateDBFile: 'The database file could not be created',
 
     NewDBHasExisting: '{messages.DBContainsAnInstallation}.\n\n{prompts.CancelNewAndUseExistingInstallation}',
     NewDBNotEmpty: '{messages.DBNotEmpty}.\n\n{messages.MustSelectEmptyDBForNewInstallation}.',
-    NewDBFileExists: '{messages.DBFileExists).\n\n{prompts.DeleteFileAndCreateNewDB}',
+    NewDBFileExists: '{messages.DBFileExists}.\n\n{prompts.DeleteFileAndCreateNewDB}\n\n{messages.CautionAllDataWillBeDeleted}.',
     CouldNotDeleteThisFile: '{messages.CouldNotDeleteFile}\n\n{file}',
     CantConnectToThisDB: '{messages.DBCantConnect} ({database})\n\n{messages.MakeSureDBExists}',
     CantConnectToDBCheckInfo: '{messages.DBCantConnect}.\n{messages.CheckDBConnectionInfo}.',
+    DBConnectionSuccessRealodApp: '{messages.DBConnectionSuccess}.\n\n{prompts.SaveDBSettingsAndReloadApp}',
+    DBInvalidDataNewInstallation: '{messages.DBHasNotValidData}.\n\n{prompts.MustSelectValidDBOrNewInstallation}.',
+    UseDefaultDBFileExists: '{messages.DefaultDBFileExists}.\n\n{prompts.UseThisFileForDB}'
   },
 
   prompts: {
     CancelNewAndUseExistingInstallation: 'Cancel new installation and use existing one?',
     DeleteFileAndCreateNewDB: 'Are you sure you want to delete the file and create a new database?',
+    SaveDBSettingsAndReloadApp: 'Do you want to save the connection settings and reload the application?',
+    MustSelectValidDBOrNewInstallation: 'You must select a database containing application data or make a new installation',
+    UseThisFileForDB: 'Use this file for database?',
   },
 
   content: {

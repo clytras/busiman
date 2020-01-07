@@ -24,6 +24,8 @@ export const Errors = {
     FileDoesNotExists: 2003, // For SQLite
     NotInitialized: 2004,
     CantFetchData: 2005,
+    InvalidData: 2006,
+    CouldNotCreateFile: 2007,
   },
   Config: {
     __category: 'config',
@@ -74,7 +76,14 @@ export function translateInternal(internal, ext = {}) {
     case Errors.DB.CantFetchData:
       res = [Warning, Strings.messages.CouldNotFetchData,, db];
       break;
-    
+    case Errors.DB.InvalidData: {
+      const message = Strings.expand(Strings.messages.DBInvalidDataNewInstallation);
+      res = [Warning, message,, db];
+      break
+    }
+    case Errors.DB.CouldNotCreateFile:
+      res = [Warning, Strings.messages.CouldNotCreateDBFile,, db];
+      break;
     // Config
     case Errors.Config.InvalidFormat:
       res = [Warning, Strings.messages.NotValidConfigFile,, config];

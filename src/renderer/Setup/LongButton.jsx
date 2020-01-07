@@ -1,24 +1,25 @@
 import React from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
-
 import ButtonBase from '@material-ui/core/ButtonBase';
-import Typography from '@material-ui/core/Typography';
+
 
 export default function({
   title,
   subtitle,
   icon: Icon,
+  disabled = false,
   className,
   classes = {},
   children,
   ...rest
 }) {
-  const localClasses = useStyles();
+  const localClasses = useStyles({ disabled });
 
   return (
     <div className={clsx(localClasses.root, classes.root, className)}>
       <ButtonBase
+        disabled={disabled}
         focusRipple
         className={clsx(localClasses.button, classes.button)}
         {...rest}
@@ -56,6 +57,7 @@ export default function({
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
+    opacity: ({ disabled }) => disabled ? .5 : 1
   },
   header: {
     display: 'flex',

@@ -6,7 +6,9 @@ import url from 'url';
 import util from 'util';
 // import { hasGPUEnabled } from '../utils';
 import { initApp } from './init';
-import { InitWindow, SetupWindow, MainWindow } from './windows';
+import InitWindow from './windows/InitWindow';
+import SetupWindow from './windows/SetupWindow';
+import MainWindow from './windows/MainWindow';
 import { MsgBox } from '@utils/dialog';
 import { Errors, translateInternal } from '@utils/errors';
 import './ipc/db';
@@ -99,9 +101,9 @@ if (!gotTheLock) {
 
     console.log('initApp', ok, internal, error);
 
-    initWindow.close();
 
     if(ok) {
+      initWindow.close();
       createMainWindow();
     } else if(internal) {
       console.log('got internal', internal);
@@ -113,8 +115,10 @@ if (!gotTheLock) {
         Errors.DB.InvalidConfig,
         Errors.DB.CantConnect
       ].indexOf(code) !== -1) {
-        MsgBox.show(translated);
+        await MsgBox.show(translated, initWindow.window);
       }
+
+      initWindow.close();
 
       // if(code === Errors.DB.InvalidConfig) {
       //   MsgBox.show({
@@ -135,11 +139,13 @@ if (!gotTheLock) {
         }
       });
     } else if(error) {
-      MsgBox.show({
+      await MsgBox.show({
         type: 'error',
         message: Strings.messages.StartupError,
         detail: error.toString()
-      })
+      });
+
+      initWindow.close();
     }
   });
 

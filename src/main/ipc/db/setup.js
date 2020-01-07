@@ -1,9 +1,15 @@
 import path from 'path';
 import { ipcMain as ipc } from 'electron';
 import { success, fail, Errors } from '@utils/errors';
-import { DB } from '@db';
+import { DB, isDBTypeSQLite } from '@db';
 import { encryptDBProperties } from '@utils/config';
 
+async function saveDBConfig(config) {
+  return await process.app.config.set(
+    'db.data.connection',
+    encryptDBProperties(config)
+  );
+}
 
 ipc.handle('setup.db.data', async (event, {
   config,
@@ -13,6 +19,8 @@ ipc.handle('setup.db.data', async (event, {
     const { client } = config;
     const { connection } = config;
     const isNew = mode === 'new';
+    const isExisting = mode === 'existing';
+    const isError = mode === 'error';
   
     const db = new DB({
       ...config,
@@ -23,6 +31,18 @@ ipc.handle('setup.db.data', async (event, {
       }
     });
   
+    console.log('setup.db.data config', config);
+
+    if(isNew && isDBTypeSQLite(client)) {
+      const { ok, error } = await db.create();
+
+      console.log('setup.db.data create', ok, error);
+
+      if(!ok) {
+        return fail.internal({ code: Errors.DB.CouldNotCreateFile, error });
+      }
+    }
+
     const canConnect = await db.exists({
       keepConnection: false,
       validateConfig: true,
@@ -52,6 +72,22 @@ ipc.handle('setup.db.data', async (event, {
       } else {
         return fail.internal({ code: Errors.DB.CouldNotFetchData });
       }
+    } else {
+      const { result: itHasMigrations, tables } = await db.hasMigrationTable();
+
+      if(itHasMigrations) {
+        // console.log('db.data.connection mig.set', await saveDBConfig(config));
+        if(!isError) {
+          await saveDBConfig(config);
+        }
+        return success();
+      }
+
+      if(tables.length) {
+        return fail.internal({ code: Errors.DB.InvalidData });
+      }
+      
+      return fail.internal({ code: Errors.DB.NotInitialized });
     }
   
     // migrate
@@ -80,10 +116,7 @@ ipc.handle('setup.db.data', async (event, {
         await db.migrate();
       }
   
-      await process.app.config.set(
-        'db.data.connection',
-        encryptDBProperties(config)
-      );
+      console.log('db.data.connection set', await saveDBConfig(config));
   
       return success();
     } else {

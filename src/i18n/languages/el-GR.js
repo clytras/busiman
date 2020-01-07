@@ -58,6 +58,7 @@ export default {
     DBProblem: 'Πρόβλημα βάσης δεδομένων',
     ConfigProblem: 'Πρόβλημα ρυθμίσεων',
     IOProblem: 'Πρόβλημα συστήματος αρχείων',
+    DBConnectionSuccess: 'Η σύνδεση με τη βάση δεδομένων είναι επιτυχής',
     DBConnectionNotValid: 'Η σύνδεση βάσης δεδομένων δεν είναι έγκυρη',
     DBCantConnect: 'Δεν είναι δυνατή η σύνδεση με τη βάση δεδομένων',
     InputPasswordForProtectedConfigFile: 'Εισάγεται τον κωδικό για το προστατευμένο αρχείο ρυθμίσεων',
@@ -74,18 +75,28 @@ export default {
     InstallationComplete: 'Η εγκατάσταση ολοκληρώθηκε',
     AppNeedsReload: 'Πρέπει να γίνει επαναφόρτώση της εφαρμογής',
     CheckDBConnectionInfo: 'Ελέγξτε αν είστε συνδεδεμένοι στο δίκτυο του εξυπηρετητή της βάσης δεδομένων ή ότι το αρχείο της βάσης δεδομένων υπάρχει',
+    DBHasNotValidData: 'Η βάση δεδομένων δεν είναι περιέχει έγκυρα δεδομένα της εφαρμογής',
+    DefaultDBFileExists: 'Φαίνεται να υπάρχει αρχείο βάσης δεδομένων στην τοπική εγκατάσταση',
+    CautionAllDataWillBeDeleted: 'ΠΡΟΣΟΧΗ: Όλα τα δεδομένα που μπορεί να περιέχει το αρχείο βάσης δεδομένων θα διαγραφούν',
+    CouldNotCreateDBFile: 'Δεν ήταν δυνατή η δημιουργία του αρχείου βάσης δεδομένων',
 
     NewDBHasExisting: '{messages.DBContainsAnInstallation}.\n\n{prompts.CancelNewAndUseExistingInstallation}',
     NewDBNotEmpty: '{messages.DBNotEmpty}.\n\n{messages.MustSelectEmptyDBForNewInstallation}.',
-    NewDBFileExists: '{messages.DBFileExists).\n\n{prompts.DeleteFileAndCreateNewDB}',
+    NewDBFileExists: '{messages.DBFileExists}.\n\n{prompts.DeleteFileAndCreateNewDB}\n\n{messages.CautionAllDataWillBeDeleted}.',
     CouldNotDeleteThisFile: '{messages.CouldNotDeleteFile}\n\n{file}',
     CantConnectToThisDB: '{messages.DBCantConnect} ({database})\n\n{messages.MakeSureDBExists}',
     CantConnectToDBCheckInfo: '{messages.DBCantConnect}.\n{messages.CheckDBConnectionInfo}.',
+    DBConnectionSuccessRealodApp: '{messages.DBConnectionSuccess}.\n\n{prompts.SaveDBSettingsAndReloadApp}',
+    DBInvalidDataNewInstallation: '{messages.DBHasNotValidData}.\n\n{prompts.MustSelectValidDBOrNewInstallation}.',
+    UseDefaultDBFileExists: '{messages.DefaultDBFileExists}.\n\n{prompts.UseThisFileForDB}',
   },
 
   prompts: {
     CancelNewAndUseExistingInstallation: 'Να ακυρωθεί η νέα εγκατάσταση και να χρησιμοποιηθεί η υπάρχουσα;',
     DeleteFileAndCreateNewDB: 'Είστε σίγουροι ότι θέλετε να διαγράψετε το αρχείο και να δημιουργήσετε μια νέα βάση δεδομένων;',
+    SaveDBSettingsAndReloadApp: 'Θέλετε να αποθηκεύσετε τις ρυθμίσεις σύνδεσης και να επαναφορτώσετε την εφαρμογή;',
+    MustSelectValidDBOrNewInstallation: 'Πρέπει να επιλέξετε μια βάση δεδομένων που να περιέχει δεδομένα της εφαρμογής ή κάνετε μια νέα εγκατάσταση',
+    UseThisFileForDB: 'Να χρησιμοποιήθει αυτό το αρχείο για βάση δεδομένων;',
   },
 
   content: {
