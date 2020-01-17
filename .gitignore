@@ -77,5 +77,6 @@ typings/
 
 # Project
 dist/
+out/
 release/
 .env
