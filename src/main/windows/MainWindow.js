@@ -11,7 +11,7 @@ export default class MainWindow extends Window {
       icon: selectAppIcon(),
       height: 600,
       width: 800,
-      frame: false,
+      // frame: false,
       show: false,
       webPreferences: {
         nativeWindowOpen: true,

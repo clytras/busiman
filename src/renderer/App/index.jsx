@@ -39,17 +39,17 @@ function App() {
 
 
   useEffect(() => {
-    const titlebar = new Titlebar({
-      backgroundColor: Color.fromHex('#444444'),
-      titleHorizontalAlignment: 'left',
-      drag: true,
-      menuPosition: 'left',
-      icon: require('@assets/bsm-icon.png').default
-    });
+    // const titlebar = new Titlebar({
+    //   backgroundColor: Color.fromHex('#444444'),
+    //   titleHorizontalAlignment: 'left',
+    //   drag: true,
+    //   menuPosition: 'left',
+    //   icon: require('@assets/bsm-icon.png').default
+    // });
 
-    return () => {
-      titlebar.dispose();
-    }
+    // return () => {
+    //   titlebar.dispose();
+    // }
   }, []);
 
 

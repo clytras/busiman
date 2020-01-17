@@ -1,12 +1,15 @@
 import os from 'os';
+import path from 'path';
 import { app, remote } from 'electron';
 
 const isRenderer = require('is-electron-renderer');
 
 export function selectAppIcon() {
   switch(os.platform()) {
-    case 'win32': return require('../../assets/BusinessMan_Win.ico').default;
-    case 'darwin': return require('../../assets/BusinessMan_Mac.icns').default;
+    // case 'win32': return require('../../assets/BusinessMan_Win.ico').default;
+    case 'win32': return path.resolve(__dirname, '../../assets/BusinessMan_Win.ico');
+    // case 'darwin': return require('../../assets/BusinessMan_Mac.icns').default;
+    case 'darwin': return path.resolve(__dirname, '../../assets/BusinessMan_Mac.icns');
     default: return require('../../assets/BusinessMan_Linux.png').default;
   }
 }
