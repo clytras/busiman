@@ -19,7 +19,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 
 import * as platform from 'platform';
-import { isDevMode, isDbgMode } from '@utils';
+import { isDevMode, isDbgMode, isMacOS } from '@utils';
 
 import IconButton from '@material-ui/core/IconButton';
 import HomeImportOutlineIcon from 'mdi-material-ui/HomeImportOutline';
@@ -39,17 +39,19 @@ function App() {
 
 
   useEffect(() => {
-    // const titlebar = new Titlebar({
-    //   backgroundColor: Color.fromHex('#444444'),
-    //   titleHorizontalAlignment: 'left',
-    //   drag: true,
-    //   menuPosition: 'left',
-    //   icon: require('@assets/bsm-icon.png').default
-    // });
-
-    // return () => {
-    //   titlebar.dispose();
-    // }
+    if(!isMacOS()) {
+      const titlebar = new Titlebar({
+        backgroundColor: Color.fromHex('#444444'),
+        titleHorizontalAlignment: 'center',
+        drag: true,
+        menuPosition: 'left',
+        icon: require('@assets/bsm-icon.png').default
+      });
+  
+      return () => {
+        titlebar.dispose();
+      }
+    }
   }, []);
 
 

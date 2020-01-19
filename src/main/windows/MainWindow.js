@@ -2,7 +2,7 @@ import path from 'path';
 import url from 'url';
 import { BrowserWindow } from 'electron';
 import { Window } from './window';
-import { selectAppIcon } from '@utils';
+import { selectAppIcon, isMacOS } from '@utils';
 
 
 export default class MainWindow extends Window {
@@ -12,6 +12,7 @@ export default class MainWindow extends Window {
       height: 600,
       width: 800,
       // frame: false,
+      frame: isMacOS(),
       show: false,
       webPreferences: {
         nativeWindowOpen: true,
