@@ -257,6 +257,7 @@ export class DB {
         try {
           db = knex(this._config);
           await db.raw('SELECT 1'); // it has to execute a single query to create the db file
+          this.db = db;
           console.warn('db.create:sqlite:ok?');
           return success({ supported: true });
         } catch(error) {

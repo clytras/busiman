@@ -41,7 +41,7 @@ export class Config extends Model {
 
   static async set(key, value) {
     try {
-      console.log('set', key, value);
+      // console.log('set', key, value);
       await this.query().insert({ key, value });
       return true;
     } catch(insertError) {
