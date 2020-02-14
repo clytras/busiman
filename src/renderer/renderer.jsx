@@ -18,7 +18,7 @@ import './global';
 import { ipcRenderer as ipc } from 'electron';
 import Init from './Init';
 import Setup from './Setup';
-import App from './App';
+import App from './App/index-tabs';
 import { Themed } from '@utils/theme';
 import { setupContextMenus } from './menus';
 

@@ -4,6 +4,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 
 import '@assets/fonts/MaterialDesignIcons/material-icons.css';
 import '@assets/fonts/Roboto/index.css';
+import 'simplebar/dist/simplebar.min.css';
 import '@renderer/styles.scss';
 
 // export default function(WrappedComponent) {

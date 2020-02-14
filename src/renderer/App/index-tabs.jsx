@@ -54,10 +54,14 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 
 
+import TabBar from '@renderer/components/Navigation/TabBar';
+
+
 const drawerWidth = 240;
 
 function App() {
   const classes = useStyles();
+  const [modalsIndex, setModalsIndex] = useState(0);
 
 
   useEffect(() => {
@@ -75,6 +79,23 @@ function App() {
       }
     }
   }, []);
+
+  function openPopup() {
+    //window.open('https://github.com', '_blank', 'nodeIntegration=no')
+  
+    let modal = window.open('', `modal-${modalsIndex}`, 'width=300,height=250');
+    setModalsIndex(modalsIndex + 1);
+    
+    console.log('modal', modal);
+  
+    modal.document.write('<div id="hdr"></div>')
+    //copyStyles(document, modal.document);
+  
+    ReactDOM.render(
+      <Header/>,
+      modal.document.getElementById('hdr')
+    );
+  }
 
   const drawer = (
     <div>
@@ -151,23 +172,10 @@ function App() {
   return (
     <WindowBase>
       <div className={classes.appContainer}>
-        <AppBar position="static" color="primary" className={classes.appBar}>
-          <Toolbar variant="dense">
-            <IconButton edge="start" color="inherit" aria-label="open drawer">
-              <MenuIcon />
-            </IconButton>
-            <div className={classes.grow} />
-            <IconButton color="inherit">
-              <SearchIcon />
-            </IconButton>
-            <IconButton edge="end" color="inherit">
-              <MoreIcon/>
-            </IconButton>
-          </Toolbar>
-        </AppBar>
         <Drawer
           classes={{
             paper: classes.drawerPaper,
+            root: classes.drawerRoot
           }}
           variant="permanent"
           open
@@ -176,6 +184,24 @@ function App() {
           {tree}
         </Drawer>
         <div className={classes.testContainer}>
+          {/* <AppBar position="static" color="primary" className={classes.appBar}>
+            <Toolbar variant="dense">
+              <IconButton edge="start" color="inherit" aria-label="open drawer">
+                <MenuIcon />
+              </IconButton>
+              <div className={classes.grow} />
+              <IconButton color="inherit">
+                <SearchIcon />
+              </IconButton>
+              <IconButton edge="end" color="inherit">
+                <MoreIcon/>
+              </IconButton>
+            </Toolbar>
+          </AppBar> */}
+          <TabBar/>
+          <Button variant="contained" onClick={openPopup}>
+            Open Popup
+          </Button>
           Testing<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
           And more 3...<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
           End!<br/>
@@ -234,13 +260,14 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     height: '100%',
     display: 'flex',
-    flexFlow: 'column'
+    // flexFlow: 'row'
+    flexDirection: 'row'
   },
   grow: {
     flexGrow: 1,
   },
   appBar: {
-    marginLeft: drawerWidth,
+    // marginLeft: drawerWidth,
     width: 'auto'
   },
   toolbar: theme.mixins.toolbar,
@@ -252,7 +279,15 @@ const useStyles = makeStyles(theme => ({
   },
   drawerPaper: {
     width: drawerWidth,
-    position: 'absolute'
+    // position: 'absolute'
+  },
+  testContainer: {
+    flex: 1,
+    overflow: 'hidden'
+  },
+
+  drawerRoot: {
+    flexBasis: drawerWidth,
   },
 
   root: {

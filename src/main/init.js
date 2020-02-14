@@ -7,6 +7,7 @@ import { decryptDBProperties } from '@utils/config';
 import { DB } from '@db';
 import { Config } from '@db/models/Config';
 
+app.allowRendererProcessReuse = true;
 
 export async function initApp() {
   try {
