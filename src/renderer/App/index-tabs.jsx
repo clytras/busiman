@@ -82,19 +82,40 @@ function App() {
 
   function openPopup() {
     //window.open('https://github.com', '_blank', 'nodeIntegration=no')
+
+    const containerEl = document.createElement('div');
+
+    ReactDOM.render(
+      <Header/>,
+      // modal.document.getElementById('hdr')
+      containerEl
+    );
   
     let modal = window.open('', `modal-${modalsIndex}`, 'width=300,height=250');
     setModalsIndex(modalsIndex + 1);
     
-    console.log('modal', modal);
+    console.log('modal', modal.global);
+
+
   
-    modal.document.write('<div id="hdr"></div>')
-    //copyStyles(document, modal.document);
+    // modal.document.write('<div id="hdr"></div>');
+    modal.document.body.appendChild(containerEl);
+
+    const ready = () => {
+      console.log('modal:DOMContentLoaded');
+      copyStyles(document, modal.document);
+    }
+    // modal.onload((e) => {
+    modal.addEventListener("DOMContentLoaded", ready);
+    modal.window.addEventListener("DOMContentLoaded", ready);
+    // modal.onload(ready);
+
+    ready();
+    
   
-    ReactDOM.render(
-      <Header/>,
-      modal.document.getElementById('hdr')
-    );
+
+    // ReactDOM.createPortal(<Header/>, modal.document.getElementById('hdr'));
+    // ReactDOM.createPortal(<Header/>, containerEl);
   }
 
   const drawer = (
@@ -202,6 +223,18 @@ function App() {
           <Button variant="contained" onClick={openPopup}>
             Open Popup
           </Button>
+          
+          <NewWindow title="Test"
+            name={`modal-1234`}
+            center="parent"
+            copyStyles={true}
+            features={{
+              width: 300,
+              height: 250
+            }}
+          >
+            <Header/>
+          </NewWindow>
           Testing<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
           And more 3...<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
           End!<br/>

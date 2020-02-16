@@ -6,6 +6,7 @@
   "description": "A business organizer application",
   "main": "./dist/main.bundle.js",
   "scripts": {
+    "i": "yarn install --network-timeout 1000000000",
     "start3": "./node_modules/.bin/electron ./dist/main.bundle.js",
     "electron": "electron . --dev --dbg",
     "start4": "nodemon ./src/main.js --exec \"yarn run electron\"",

@@ -46,7 +46,11 @@ export default class MainWindow extends Window {
     this.window.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
       if (frameName.substring(0, 5) == 'modal') {
         // open window as modal
-        event.preventDefault()
+
+        console.log('new-window', frameName, options);
+
+
+        event.preventDefault();
         Object.assign(options, {
           // modal: true,
           modal: false,
@@ -61,6 +65,10 @@ export default class MainWindow extends Window {
         event.newGuest = new BrowserWindow(options);
         event.newGuest.setMenu(null);
         event.newGuest.webContents.openDevTools();
+        event.newGuest.on('page-title-updated', (evt) => {
+          console.log(frameName, 'page-title-updated', evt);
+          evt.preventDefault();
+        });
 
         this.popups.push(event.newGuest);
       }
