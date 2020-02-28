@@ -7,7 +7,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite/no-important';
 import { Strings } from '@i18n';
 import Header from './components/Header';
-import Footer from './components/Footer';
+import Footer from './components/Footer_old';
 import SideNav from './components/SideNav';
 
 import * as platform from 'platform';

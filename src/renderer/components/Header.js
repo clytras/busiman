@@ -10,14 +10,23 @@ export default function() {
   const classes = useStyles();
   const [counter, setCounter] = useState(0);
 
+  // useEffect(() => {
+  //   document.title = 'From header!';
+  // }, []);
+
   function adjCounter(value) {
     setCounter(counter + value);
   }
 
   return (
-    <header className={classes.headerContainer}>
-      {Strings.Home} <span className={classes.counter}>{counter}</span><span onClick={adjCounter.bind(this, 1)} className={classes.btn}>Inc</span><span onClick={adjCounter.bind(this, -1)} className={classes.btn}>Dec</span>
-    </header>
+    <>
+      <header className={classes.headerContainer}>
+        {Strings.Home} <span className={classes.counter}>{counter}</span><span onClick={adjCounter.bind(this, 1)} className={classes.btn}>Inc</span><span onClick={adjCounter.bind(this, -1)} className={classes.btn}>Dec</span>
+      </header>
+      <Button variant="contained" onClick={() => console.log('test click')}>
+        Open Popup
+      </Button>
+    </>
   );
 }
 
@@ -25,7 +34,9 @@ const useStyles = makeStyles({
   headerContainer: {
     padding: 10,
     borderBottom: `1px solid ${Globals.colors.frameBorders}`,
-    color: 'red'
+    color: 'red',
+    userSelect: 'none',
+    cursor: 'default'
   },
 
   counter: {

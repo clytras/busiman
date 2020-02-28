@@ -2,7 +2,7 @@ import { isDevMode } from '@utils';
 
 export class Window {
   window = null;
-  popups = [];
+  popups = {};
 
   constructor(browserWindowOptions, options) {
     this.browserWindowOptions = browserWindowOptions || {};

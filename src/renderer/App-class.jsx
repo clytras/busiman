@@ -12,7 +12,7 @@ import NewWindow from 'react-new-window'
 import { StyleSheet, css } from 'aphrodite/no-important';
 import { Strings } from '@i18n';
 import Header from './components/Header';
-import Footer from './components/Footer';
+import Footer from './components/Footer_old';
 import SideNav from './components/SideNav';
 import Button from '@material-ui/core/Button';
 

@@ -1,8 +1,9 @@
 import path from 'path';
 import url from 'url';
+import Qs from 'qs';
 import { BrowserWindow } from 'electron';
 import { Window } from './window';
-import { selectAppIcon, isMacOS } from '@utils';
+import { appTitle, selectAppIcon, isMacOS } from '@utils';
 
 
 export default class MainWindow extends Window {
@@ -47,12 +48,16 @@ export default class MainWindow extends Window {
       if (frameName.substring(0, 5) == 'modal') {
         // open window as modal
 
-        console.log('new-window', frameName, options);
+        const urlobj = new URL(url);
+        const params = Qs.parse(urlobj.search);
 
+        console.log('new-window', url, frameName, options, additionalFeatures, event, disposition);
+        console.log('new-window:url', urlobj.search, urlobj.searchParams, params);
 
         event.preventDefault();
         Object.assign(options, {
           // modal: true,
+          title: appTitle(urlobj.searchParams.get('title')),
           modal: false,
           parent: this.window,
           //width: 100,
@@ -65,12 +70,17 @@ export default class MainWindow extends Window {
         event.newGuest = new BrowserWindow(options);
         event.newGuest.setMenu(null);
         event.newGuest.webContents.openDevTools();
-        event.newGuest.on('page-title-updated', (evt) => {
-          console.log(frameName, 'page-title-updated', evt);
-          evt.preventDefault();
+        // event.newGuest.on('page-title-updated', (evt, ...rest) => {
+        //   console.log(frameName, 'page-title-updated', evt, rest);
+        //   evt.preventDefault();
+        // });
+        event.newGuest.on('closed', () => {
+          console.log('new-window:closed', frameName, url);
+          delete this.popups[frameName];
         });
 
-        this.popups.push(event.newGuest);
+        // this.popups.push(event.newGuest);
+        this.popups[frameName] = event.newGuest;
       }
     });
 

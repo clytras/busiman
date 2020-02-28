@@ -85,21 +85,30 @@ function App() {
 
     const containerEl = document.createElement('div');
 
+    // ReactDOM.render(
+    //   <Header/>,
+    //   // modal.document.getElementById('hdr')
+    //   containerEl
+    // );
+  
+    let modal = window.open(`about:blank?title=${encodeURIComponent('Header test')}`, `modal-${modalsIndex}`, 'width=300,height=250');
+    setModalsIndex(modalsIndex + 1);
+    
+    console.log('modal', modal.global);
+
+  
+    // modal.document.write('<div id="hdr"></div>');
+    modal.document.body.appendChild(containerEl);
     ReactDOM.render(
       <Header/>,
       // modal.document.getElementById('hdr')
       containerEl
     );
-  
-    let modal = window.open('', `modal-${modalsIndex}`, 'width=300,height=250');
-    setModalsIndex(modalsIndex + 1);
-    
-    console.log('modal', modal.global);
 
+    // const titleEl = document.createElement('title');
+    // titleEl.appendChild(document.createTextNode("Hi there and greetings!"));
 
-  
-    // modal.document.write('<div id="hdr"></div>');
-    modal.document.body.appendChild(containerEl);
+    // modal.document.head.appendChild(titleEl);
 
     const ready = () => {
       console.log('modal:DOMContentLoaded');
@@ -108,6 +117,16 @@ function App() {
     // modal.onload((e) => {
     modal.addEventListener("DOMContentLoaded", ready);
     modal.window.addEventListener("DOMContentLoaded", ready);
+
+    // ReactDOM.render(
+    //   <Header/>,
+    //   modal.document.getElementById('hdr')
+    //   // containerEl
+    // );
+
+    // setTimeout(() => modal.window.document.title = 'Testing', 3000);
+
+    
     // modal.onload(ready);
 
     ready();
@@ -192,53 +211,56 @@ function App() {
 
   return (
     <WindowBase>
-      <div className={classes.appContainer}>
-        <Drawer
-          classes={{
-            paper: classes.drawerPaper,
-            root: classes.drawerRoot
-          }}
-          variant="permanent"
-          open
-        >
-          {/* {drawer} */}
-          {tree}
-        </Drawer>
-        <div className={classes.testContainer}>
-          {/* <AppBar position="static" color="primary" className={classes.appBar}>
-            <Toolbar variant="dense">
-              <IconButton edge="start" color="inherit" aria-label="open drawer">
-                <MenuIcon />
-              </IconButton>
-              <div className={classes.grow} />
-              <IconButton color="inherit">
-                <SearchIcon />
-              </IconButton>
-              <IconButton edge="end" color="inherit">
-                <MoreIcon/>
-              </IconButton>
-            </Toolbar>
-          </AppBar> */}
-          <TabBar/>
-          <Button variant="contained" onClick={openPopup}>
-            Open Popup
-          </Button>
-          
-          <NewWindow title="Test"
-            name={`modal-1234`}
-            center="parent"
-            copyStyles={true}
-            features={{
-              width: 300,
-              height: 250
+      <div className={classes.appFrame}>
+        <div className={classes.appContainer}>
+          <Drawer
+            classes={{
+              paper: classes.drawerPaper,
+              root: classes.drawerRoot
             }}
+            variant="permanent"
+            open
           >
-            <Header/>
-          </NewWindow>
-          Testing<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-          And more 3...<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-          End!<br/>
+            {/* {drawer} */}
+            {tree}
+          </Drawer>
+          <div className={classes.testContainer}>
+            {/* <AppBar position="static" color="primary" className={classes.appBar}>
+              <Toolbar variant="dense">
+                <IconButton edge="start" color="inherit" aria-label="open drawer">
+                  <MenuIcon />
+                </IconButton>
+                <div className={classes.grow} />
+                <IconButton color="inherit">
+                  <SearchIcon />
+                </IconButton>
+                <IconButton edge="end" color="inherit">
+                  <MoreIcon/>
+                </IconButton>
+              </Toolbar>
+            </AppBar> */}
+            <TabBar/>
+            <Button variant="contained" onClick={openPopup}>
+              Open Popup
+            </Button>
+            
+            {/* <NewWindow // title="Test"
+              name={`modal-1234`}
+              center="parent"
+              copyStyles={true}
+              features={{
+                width: 300,
+                height: 250
+              }}
+            >
+              <Header/>
+            </NewWindow> */}
+            Testing<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+            And more 3...<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+            End!<br/>
+          </div>
         </div>
+        <Footer/>
       </div>
     </WindowBase>
   );
@@ -289,10 +311,18 @@ StyledTreeItem.propTypes = {
 };
 
 const useStyles = makeStyles(theme => ({
-  appContainer: {
+  appFrame: {
     overflow: 'hidden',
     height: '100%',
     display: 'flex',
+    // flexFlow: 'row'
+    flexDirection: 'column'
+  },
+  appContainer: {
+    overflow: 'hidden',
+    // height: '100%',
+    display: 'flex',
+    flex: 1,
     // flexFlow: 'row'
     flexDirection: 'row'
   },
@@ -312,7 +342,7 @@ const useStyles = makeStyles(theme => ({
   },
   drawerPaper: {
     width: drawerWidth,
-    // position: 'absolute'
+    position: 'unset'
   },
   testContainer: {
     flex: 1,

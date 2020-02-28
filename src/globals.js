@@ -22,6 +22,10 @@ export default {
 
     wizardPanel: '#0000000d',
 
+    footer: {
+      
+    },
+
     msg: {
       info: '#fff',
       

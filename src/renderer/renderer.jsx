@@ -2,7 +2,10 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { DndProvider } from 'react-dnd';
+import Backend from 'react-dnd-html5-backend';
 import { setConfig } from 'react-hot-loader'
+
 
 // https://github.com/gaearon/react-hot-loader/issues/1088#issuecomment-440820031
 setConfig({
@@ -35,5 +38,9 @@ if(document.getElementById('init')) {
     ReactDOM.render(<Themed><Setup {...props}/></Themed>, document.getElementById('setup'));
   })();
 } else if(document.getElementById('app')) {
-  ReactDOM.render(<Themed><App/></Themed>, document.getElementById('app'));
+  ReactDOM.render((
+    <DndProvider backend={Backend}>
+      <Themed><App/></Themed>
+    </DndProvider>
+  ), document.getElementById('app'));
 }
