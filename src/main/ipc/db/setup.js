@@ -33,12 +33,12 @@ ipc.handle('setup.db.data', async (event, {
   
     console.log('setup.db.data config', config);
 
-    if(isNew && isDBTypeSQLite(client)) {
+    if (isNew && isDBTypeSQLite(client)) {
       const { ok, error } = await db.create();
 
       console.log('setup.db.data create', ok, error);
 
-      if(!ok) {
+      if (!ok) {
         return fail.internal({ code: Errors.DB.CouldNotCreateFile, error });
       }
     }
@@ -49,24 +49,24 @@ ipc.handle('setup.db.data', async (event, {
       useDatabase: false
     });
   
-    if(!canConnect) {
+    if (!canConnect) {
       return fail.internal({ code: Errors.DB.CantConnect });
     }
   
     const exists = await db.exists();
   
-    if(!exists) {
+    if (!exists) {
       let { database } = connection;
-      if(!database) database = connection.filename;
+      if (!database) database = connection.filename;
   
       return fail.internal({ code: Errors.DB.CantConnect, database });
     }
   
-    if(isNew) {
+    if (isNew) {
       const { ok, tables } = await db.listTables();
   
-      if(ok) {
-        if(tables.length > 0) {
+      if (ok) {
+        if (tables.length > 0) {
           return fail.internal({ code: Errors.Setup.NewDBNotEmpty });
         }
       } else {
@@ -75,15 +75,15 @@ ipc.handle('setup.db.data', async (event, {
     } else {
       const { result: itHasMigrations, tables } = await db.hasMigrationTable();
 
-      if(itHasMigrations) {
+      if (itHasMigrations) {
         // console.log('db.data.connection mig.set', await saveDBConfig(config));
-        if(!isError) {
+        if (!isError) {
           await saveDBConfig(config);
         }
         return success();
       }
 
-      if(tables.length) {
+      if (tables.length) {
         return fail.internal({ code: Errors.DB.InvalidData });
       }
       
@@ -93,26 +93,26 @@ ipc.handle('setup.db.data', async (event, {
     // migrate
     const { ok, migrations } = await db.listMigrations();
   
-    if(ok) {
+    if (ok) {
       console.log('ok mig', migrations);
   
       const [complete, pending] = migrations;
   
-      // if(isNew) {
-      //   if(complete.length > 0) {
+      // if (isNew) {
+      //   if (complete.length > 0) {
       //     const result = MsgBox.show({
       //       type: 'question',
       //       buttons: MsgBox.Buttons.YesNo,
       //       message: Strings.expand(Strings.messages.NewDBHasExisting)
       //     }, 'current');
   
-      //     if(result === 1) { // No, don't use existing
+      //     if (result === 1) { // No, don't use existing
       //       return;
       //     }
       //   }
       // }
   
-      if(pending.length > 0) {
+      if (pending.length > 0) {
         await db.migrate();
       }
   

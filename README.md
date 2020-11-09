@@ -1,8 +1,11 @@
-test javascript
+### Development
 
-```diff
-- require("electron");
-+ require("electron-new");
+One process for HMR:
+```
+yarn hot
+```
 
-function test() {}
+and one for electron:
+```
+yarn dev:electron
 ```

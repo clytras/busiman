@@ -125,13 +125,13 @@ class Setup extends React.Component {
 
     let msg;
   
-    if(code === Errors.DB.CantConnect) {
+    if (code === Errors.DB.CantConnect) {
       msg = {
         type: 'warning',
         title: Strings.messages.DBProblem,
         message: Strings.expand(Strings.messages.CantConnectToDBCheckInfo),
       }
-    } else if(code) {
+    } else if (code) {
       msg = translateInternal(internal);
     }
 
@@ -158,7 +158,7 @@ class Setup extends React.Component {
     // })();
     
 
-    if(
+    if (
       dbFile !== remote.process.app.db.dataDefaultSQLiteFile &&
       await lfs.existsAsync(remote.process.app.db.dataDefaultSQLiteFile)
     ) {
@@ -169,7 +169,7 @@ class Setup extends React.Component {
           message: Strings.expand(Strings.messages.UseDefaultDBFileExists)
         }, 'current');
 
-        if(response === 0) {
+        if (response === 0) {
           // use default
           const config = {
             client: 'sqlite',
@@ -182,6 +182,8 @@ class Setup extends React.Component {
         }
       }, 700);
     }
+
+    console.log('appTitle', appTitle(), appTitle("Test"));
 
     document.title = appTitle(Strings.titles.Installation);
     this.setState({
@@ -224,7 +226,7 @@ class Setup extends React.Component {
   }
 
   handleDBTypeChange(dbType) {
-    if(dbType === 'config') {
+    if (dbType === 'config') {
       //this.setState({ showConfigFilePasswordPrompt: true, dbType });
 
       const { dialog, getCurrentWindow } = remote;
@@ -237,7 +239,7 @@ class Setup extends React.Component {
       .then(({ canceled, filePaths }) => {
         // console.log(dbType, canceled, filePaths);
 
-        if(canceled) {
+        if (canceled) {
           return this.setState({ dbType: '' });
         }
 
@@ -248,21 +250,21 @@ class Setup extends React.Component {
 
         // console.log('handleDBTypeChange', ok, data, encrypted, internal, error)
 
-        if(ok) {
-          // if(encrypted) {
+        if (ok) {
+          // if (encrypted) {
           //   console.log('encrypted', configFile);
           //   this.setState({ configFile, showConfigFilePasswordPrompt: true })
           // } else {
           //   this.applyConfigFileData(data);
           // }
-          if(!encrypted) {
+          if (!encrypted) {
             this.applyConfigFileData(data);
           }
           this.setState({ configFile, showConfigFilePasswordPrompt: !!encrypted })
-        } else if(internal) {
+        } else if (internal) {
           let detail = error ? error.toString() : undefined;
           MsgBox.show(translateInternal(internal, { detail }), 'current');
-        } else if(error) {
+        } else if (error) {
           MsgBox.show({
             type: 'error',
             message: Strings.messages.LoadingFileError,
@@ -281,7 +283,7 @@ class Setup extends React.Component {
       });
     } else {
       const { configFile } = this.state;
-      if(configFile) {
+      if (configFile) {
         this.resetDBInputs({ dbType, configFile: '', configFilePassword: '' })
       } else {
         this.setState({ dbType, configFile: '', configFilePassword: '' });
@@ -291,7 +293,7 @@ class Setup extends React.Component {
 
   handleHostChange = ({ target: { value: dbHost }}) => this.setState({ dbHost });
   handlePortChange({ target: { value: dbPort }}) {
-    if(!dbPort.length || isInt(dbPort, { min: 1, max: 0x10000 -1 })) {
+    if (!dbPort.length || isInt(dbPort, { min: 1, max: 0x10000 -1 })) {
       this.setState({ dbPort });
     }
   }
@@ -339,11 +341,11 @@ class Setup extends React.Component {
 
     console.log('handleSQLiteSelectFile', dbFile, mode, await lfs.existsAsync(dbFile));
 
-    if(!dbFile) {
+    if (!dbFile) {
       return this.setState({ dbFile, sqliteError: '' });
     }
 
-    if(mode !== 'new' && !(await lfs.existsAsync(dbFile))) {
+    if (mode !== 'new' && !(await lfs.existsAsync(dbFile))) {
       return this.setState({ dbFile, sqliteError: Strings.messages.FileNotFound});
     }
 
@@ -359,7 +361,7 @@ class Setup extends React.Component {
   handleSelectInstallation(mode) {
     this.setState({ mode });
 
-    if(mode === 'new') {
+    if (mode === 'new') {
       this.goNextPage('SelectNewType', Strings.titles.NewInstallation);
     } else {
       this.goNextPage('DBConnectionTools', Strings.titles.ConnectToDB);
@@ -390,11 +392,11 @@ class Setup extends React.Component {
   goPreviousPage() {
     const { breadcrumbs, pages: { stack }} = this.state;
 
-    if(stack.length) {
+    if (stack.length) {
       stack.pop();
       const current = stack.length - 1;
 
-      if(breadcrumbs.length) {
+      if (breadcrumbs.length) {
         breadcrumbs.pop();
       }
 
@@ -409,7 +411,7 @@ class Setup extends React.Component {
   applyConfigFilePassword() {
     const { configFile, configFilePassword: secret } = this.state;
 
-    if(!secret) {
+    if (!secret) {
       this.setState({ configFilePasswordError: true });
       return false;
     }
@@ -418,14 +420,14 @@ class Setup extends React.Component {
       ok, data, internal, error
     } = loadDBConfigFile(configFile, { secret });
 
-    if(ok) {
+    if (ok) {
       this.applyConfigFileData(data);
       return true;
     }
 
-    if(internal) {
+    if (internal) {
       MsgBox.show(translateInternal(internal), 'current');
-    } else if(error) {
+    } else if (error) {
       MsgBox.show({
         type: 'error',
         message: Strings.messages.LoadingFileError,
@@ -460,12 +462,12 @@ class Setup extends React.Component {
   canTestConnection() {
     const { mode, dbType } = this.state;
 
-    if(isDBTypeSQLite(dbType)) {
+    if (isDBTypeSQLite(dbType)) {
       const { dbFile } = this.state;
       return !!dbFile && (mode === 'new' || fs.existsSync(dbFile));
     }
 
-    if(isDBTypeSupported(dbType)) {
+    if (isDBTypeSupported(dbType)) {
       const { dbHost, dbUser, dbDatabase } = this.state;
       return !!dbHost && !!dbUser && !!dbDatabase;
     }
@@ -478,19 +480,19 @@ class Setup extends React.Component {
     const isError = mode === 'error';
     let config;
 
-    if(isDBTypeSQLite(client)) {
+    if (isDBTypeSQLite(client)) {
       const { dbFile: filename } = this.state;
       const connection = { filename }
       config = { client, connection }
 
-      if(isNew && await lfs.existsAsync(filename)) {
+      if (isNew && await lfs.existsAsync(filename)) {
         const { response } = await MsgBox.show({
           type: 'question',
           buttons: MsgBox.Buttons.YesCancel,
           message: Strings.expand(Strings.messages.NewDBFileExists)
         });
 
-        if(response === 1) { // No
+        if (response === 1) { // No
           return;
         }
 
@@ -517,19 +519,19 @@ class Setup extends React.Component {
 
     this.setState({ loading: true, testingConnection: true });
 
-    if(config) {
+    if (config) {
       setupDBData({ mode, config })
       .then(async ({ ok, ...rest }) => {
         console.log('setupDBData', ok, rest);
-        if(ok) {
-          if(isError) {
+        if (ok) {
+          if (isError) {
             const { response } = await MsgBox.show({
               type: 'question',
               buttons: MsgBox.Buttons.YesNo,
               message: Strings.expand(Strings.messages.DBConnectionSuccessRealodApp)
             });
 
-            if(response === 0) { // Yes, save settings and reload app
+            if (response === 0) { // Yes, save settings and reload app
               await process.app.config.set('db.data.connection', encryptDBProperties(config));
               this.handleReload();
             }
@@ -545,9 +547,9 @@ class Setup extends React.Component {
         const { internal, error = err } = err || {};
         let msgbox;
 
-        if(internal) {
+        if (internal) {
           msgbox = translateInternal(internal);
-        } else if(error) {
+        } else if (error) {
           msgbox = {
             type: 'error',
             message: Strings.messages.DBProblem,
@@ -555,7 +557,7 @@ class Setup extends React.Component {
           }
         }
 
-        if(msgbox) {
+        if (msgbox) {
           MsgBox.show(msgbox, 'current');
         }
       })
@@ -626,14 +628,14 @@ class Setup extends React.Component {
         nextText = nextButtonText, 
         disableNext;
 
-    if(page === 'Finished') return;
+    if (page === 'Finished') return;
     
-    if(page === 'DBConnectionTools') {
+    if (page === 'DBConnectionTools') {
       showNext = true;
       disableNext = !this.canTestConnection();
       onNext = this.testConnection;
 
-      if(mode === 'error') {
+      if (mode === 'error') {
         nextText = normalizeGreek(Strings.titles.TestConnection);
       }
     }
@@ -676,7 +678,7 @@ class Setup extends React.Component {
   renderDBType(dbType) {
     const { classes } = this.props;
 
-    if(isDBTypeSQLite(dbType)) {
+    if (isDBTypeSQLite(dbType)) {
       const { loading, mode, sqliteError, dbFile } = this.state;
 
       return (
@@ -703,7 +705,7 @@ class Setup extends React.Component {
       );
     }
 
-    if(isDBTypeSupported(dbType)) {
+    if (isDBTypeSupported(dbType)) {
       const { loading, configFile, dbHost, dbPort, dbUser, dbPassword, dbDatabase } = this.state;
       const disabled = loading || !!configFile;
 

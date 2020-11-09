@@ -15,6 +15,7 @@ export function selectAppIcon() {
 }
 
 export function appTitle(...parts) {
+  console.log('app.name', (isRenderer ? remote.app : app).name);
   return [(isRenderer ? remote.app : app).name, ...parts].join(' - ');
 }
 
