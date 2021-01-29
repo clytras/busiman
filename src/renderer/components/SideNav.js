@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { StyleSheet, css } from 'aphrodite/no-important';
 import { Strings } from '@i18n';
 import Globals from '@app/globals';
@@ -11,7 +11,7 @@ import {
 
 import 'react-accessible-accordion/dist/fancy-example.css';
 
-export default class SideNav extends React.Component {
+export default class SideNav extends Component {
     constructor(props) {
         super(props);
         this.state = {

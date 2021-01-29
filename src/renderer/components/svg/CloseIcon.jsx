@@ -1,5 +1,3 @@
-import React from 'react'
-
 export default ({
   width = 10,
   height = 10,

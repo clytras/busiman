@@ -1,5 +1,5 @@
 import path from 'path';
-import React from 'react'
+import { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { hot } from 'react-hot-loader/root'
 // import CssBaseline from '@material-ui/core/CssBaseline';
@@ -69,7 +69,7 @@ import 'react-splitter-layout/lib/index.css';
 // )
 
 
-class App extends React.Component {
+class App extends Component {
   // const classes = useStyles();
   // const [modalsIndex, setModalsIndex] = useState(0);
 

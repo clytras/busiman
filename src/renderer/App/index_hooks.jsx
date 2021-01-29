@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import path from 'path';
 import { hot } from 'react-hot-loader/root'

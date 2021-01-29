@@ -1,4 +1,4 @@
-import React from 'react'
+import { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { copyStyles } from '../utils/DOM';
 import SplitterLayout from 'react-splitter-layout';
@@ -48,7 +48,7 @@ import './styles.scss';
 
 
 
-class App extends React.Component {
+class App extends Component {
   constructor(props) {
   super(props);
   this.state = {

@@ -1,9 +1,9 @@
-import React from 'react';
+import { Component } from 'react';
 import { StyleSheet, css } from 'aphrodite';
 import { Strings } from '@i18n';
 import Globals from '@app/globals';
 
-export default class Footer extends React.Component {
+export default class Footer extends Component {
     constructor(props) {
         super(props);
         this.state = {

@@ -2,7 +2,12 @@ require('dotenv').config();
 const path = require('path');
 
 module.exports = {
-  presets: ["@babel/preset-env", "@babel/preset-react"],
+  presets: [
+    "@babel/preset-env",
+    ["@babel/preset-react", {
+      "runtime": "automatic"
+    }]
+  ],
   plugins: [
     ["module-resolver", {
       root: ["./src"],

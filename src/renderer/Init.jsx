@@ -1,5 +1,5 @@
 import path from 'path';
-import React, { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { ipcRenderer as ipc } from 'electron';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -34,12 +34,12 @@ export default function() {
   }, []);
 
   return (
-    <React.Fragment>
+    <Fragment>
       <CssBaseline/>
       <div className={classes.initContainer}>
         <LogoLoader useLogo={true} width={68} height={68}/>
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 }
 

@@ -1,5 +1,5 @@
 import path from 'path';
-import React, { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { hot } from 'react-hot-loader/root'
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -97,7 +97,7 @@ function App() {
   }
 
   return (
-    <React.Fragment>
+    <Fragment>
       <CssBaseline/>
       <div className={classes.appContainer}>
         <Header/>
@@ -152,7 +152,7 @@ function App() {
         </div>
         <Footer/>
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 }
 

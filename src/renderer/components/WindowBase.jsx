@@ -1,4 +1,4 @@
-import React from 'react';
+import { Fragment } from 'react';
 // import { hot } from 'react-hot-loader/root';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
@@ -42,10 +42,10 @@ import '@renderer/styles.scss';
 
 function WindowBase({ children }) {
   return (
-    <React.Fragment>
+    <Fragment>
       <CssBaseline/>
       {children}
-    </React.Fragment>
+    </Fragment>
   );
 }
 

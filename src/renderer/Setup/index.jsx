@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component, Fragment } from 'react';
 import { hot } from 'react-hot-loader/root';
 import path from 'path';
 import util from 'util';
@@ -52,7 +52,7 @@ import '@renderer/styles.scss';
 import { setPriority } from 'os';
 
 
-class Setup extends React.Component {
+class Setup extends Component {
   static defaultProps = {}
   state = {
     loading: false,
@@ -160,7 +160,7 @@ class Setup extends React.Component {
 
     if (
       dbFile !== remote.process.app.db.dataDefaultSQLiteFile &&
-      await lfs.existsAsync(remote.process.app.db.dataDefaultSQLiteFile)
+      (await lfs.existsAsync(remote.process.app.db.dataDefaultSQLiteFile))
     ) {
       setTimeout(async () => {
         const { response } = await MsgBox.show({
@@ -485,7 +485,7 @@ class Setup extends React.Component {
       const connection = { filename }
       config = { client, connection }
 
-      if (isNew && await lfs.existsAsync(filename)) {
+      if (isNew && (await lfs.existsAsync(filename))) {
         const { response } = await MsgBox.show({
           type: 'question',
           buttons: MsgBox.Buttons.YesCancel,
@@ -934,14 +934,14 @@ class Setup extends React.Component {
     const page = current !== undefined && stack[current];
 
     return (
-      <React.Fragment>
+      <Fragment>
         <CssBaseline/>
         <div className={classes.container}>
           {this.renderHeader(page)}
           <section className={classes.section}>{this.renderContent(page)}</section>
           {this.renderFooter(page)}
         </div>
-      </React.Fragment>
+      </Fragment>
     );
   }
 }

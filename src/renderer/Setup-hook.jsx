@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import { Fragment, useState, useEffect, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { hot } from 'react-hot-loader/root';
 import path from 'path';
@@ -69,7 +69,7 @@ function Setup({
   console.log('msgtype render', msgtype);
 
   return (
-    <React.Fragment>
+    <Fragment>
       <CssBaseline/>
       <div className={classes.container}>
         <header className={classes.header}>
@@ -94,7 +94,7 @@ Why would one use one over the other?`}/>
           </Button>
         </footer>
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 }
 
