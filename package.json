@@ -144,7 +144,7 @@
     "is-electron-renderer": "^2.0.1",
     "jest": "^25.1.0",
     "jest-extended": "^0.11.5",
-    "knex": "^0.20.9",
+    "knex": "^2.4.0",
     "luxon": "^1.22.0",
     "mdi-material-ui": "^6.11.0",
     "mkdir": "^0.0.2",
